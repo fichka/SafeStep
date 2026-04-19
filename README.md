@@ -1,16 +1,78 @@
-# React + Vite
+# MedRemind
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+MedRemind is an interactive React prototype for a medication reminder app.
+It demonstrates the main user flows for both an elder user and a caregiver: registration, medication tracking, prescription scanning, QR pairing, and rewards.
 
-Currently, two official plugins are available:
+## Demo Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- registration and role selection flow
+- `Elder` and `Caregiver` modes
+- medication list with dose tracking
+- add medication form
+- prescription scan screen
+- QR pairing flow between elder and caregiver
+- rewards screen with streak-based mechanics
+- language switcher: `ru/en`
+- font size switcher
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19
+- Vite
+- Tailwind CSS
+- lucide-react
 
-## Expanding the ESLint configuration
+## Local Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Requires `Node.js` 18 or newer.
+
+```bash
+npm install
+npm run dev
+```
+
+Vite usually starts the app at `http://localhost:5173/`.
+
+## Build
+
+```bash
+npm run build
+```
+
+Preview the production build locally:
+
+```bash
+npm run preview
+```
+
+## Project Structure
+
+```text
+src/
+  App.jsx
+  MedRemind.jsx
+  main.jsx
+  index.css
+public/
+  favicon.svg
+  icons.svg
+```
+
+## Notes
+
+- This is a UI/UX prototype, not a production-ready backend application.
+- The app uses demo data stored on the client side.
+- Most screens and interaction logic are implemented in `src/MedRemind.jsx`.
+
+## Scripts
+
+```bash
+npm run dev
+npm run build
+npm run preview
+npm run lint
+```
+
+## Repository
+
+GitHub: `https://github.com/fichka/MedRemind`
