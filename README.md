@@ -1,4 +1,4 @@
-# SafeWalk — GPS Safety Monitoring for Elderly with Dementia
+# SafeStep — GPS Safety Monitoring for Elderly with Dementia
 
 Interactive React prototype for a hackathon iOS app. Monitors the location and behavior of elderly people with dementia and alerts their caretaker when something seems wrong.
 
