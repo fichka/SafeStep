@@ -1,14 +1,16 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import {
-  Mic, Camera, Plus, Settings as SettingsIcon, Bell, Phone, QrCode,
-  User, ArrowLeft, Pill, Type, Check, Eye, EyeOff,
-  ChevronRight, Heart, Users, Scan, MessageSquare, Clock,
-  AlertCircle, LogOut, UserPlus, Globe, HelpCircle, Trash2, Volume2,
-  RotateCcw
+  Shield, AlertTriangle, Battery, Phone, Bell,
+  Settings as SettingsIcon, User, ArrowLeft, ChevronRight,
+  Clock, Activity, Home, Check, Plus, X, Brain,
+  AlertCircle, Volume2, LogOut, RotateCcw, Wifi, Signal,
+  Zap, Moon, PhoneCall, Camera, Map, Eye, EyeOff,
+  Navigation, Heart, Lock, MapPin, Radio, Mic,
+  Globe, UserPlus, Type, Layers
 } from "lucide-react";
 
 /* =========================================================
-   MedRemind \u2014 interactive UI/UX prototype (demo-ready)
+   SafeStep — GPS Safety Monitoring for Elderly with Dementia
    Colors: #ff7d29 brand, #f3f3f3 bg, #212121 text
    ========================================================= */
 
@@ -21,414 +23,276 @@ const CARD = "#ffffff";
 const LINE = "#e5e7eb";
 const GREEN = "#10b981";
 const RED = "#ef4444";
-
-const PALETTE = [
-  "#ff7d29", "#6366f1", "#0ea5e9", "#22c55e",
-  "#8b5cf6", "#f59e0b", "#ec4899", "#06b6d4", "#84cc16",
-];
+const BLUE = "#0ea5e9";
+const YELLOW = "#f59e0b";
+const PURPLE = "#8b5cf6";
 
 const T = {
   ru: {
-    tagline: "\u041d\u0438\u043a\u043e\u0433\u0434\u0430 \u043d\u0435 \u0437\u0430\u0431\u044b\u0432\u0430\u0439\u0442\u0435 \u043e \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430\u0445",
-    createAccount: "\u0421\u043e\u0437\u0434\u0430\u0442\u044c \u0430\u043a\u043a\u0430\u0443\u043d\u0442",
-    first: "\u0418\u043c\u044f",
-    last: "\u0424\u0430\u043c\u0438\u043b\u0438\u044f",
-    email: "\u042d\u043b\u0435\u043a\u0442\u0440\u043e\u043d\u043d\u0430\u044f \u043f\u043e\u0447\u0442\u0430",
-    password: "\u041f\u0430\u0440\u043e\u043b\u044c",
-    uploadPhoto: "\u041d\u0430\u0436\u043c\u0438\u0442\u0435, \u0447\u0442\u043e\u0431\u044b \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u044c \u0444\u043e\u0442\u043e",
-    continue: "\u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0438\u0442\u044c",
-    back: "\u041d\u0430\u0437\u0430\u0434",
-    chooseRole: "\u041a\u0442\u043e \u0432\u044b?",
-    elder: "\u041f\u043e\u0436\u0438\u043b\u043e\u0439",
-    elderDesc: "\u041f\u0440\u0438\u043d\u0438\u043c\u0430\u044e \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430",
-    caregiver: "\u041f\u043e\u043c\u043e\u0449\u043d\u0438\u043a",
-    caregiverDesc: "\u0417\u0430\u0431\u043e\u0447\u0443\u0441\u044c \u043e \u0431\u043b\u0438\u0437\u043a\u043e\u043c",
-    elderType: "\u041a\u0430\u043a \u0432\u044b \u0431\u0443\u0434\u0435\u0442\u0435 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u0442\u044c\u0441\u044f?",
-    solo: "\u0421\u0430\u043c\u043e\u0441\u0442\u043e\u044f\u0442\u0435\u043b\u044c\u043d\u043e",
-    soloDesc: "\u0421\u0430\u043c \u0443\u043f\u0440\u0430\u0432\u043b\u044f\u044e \u043f\u0440\u0438\u0451\u043c\u043e\u043c",
-    withCare: "\u0421 \u043f\u043e\u043c\u043e\u0449\u043d\u0438\u043a\u043e\u043c",
-    withCareDesc: "\u041a\u0442\u043e-\u0442\u043e \u0441\u043b\u0435\u0434\u0438\u0442 \u0437\u0430 \u043c\u043d\u043e\u0439",
-    sunday: "\u0412\u043e\u0441\u043a\u0440\u0435\u0441\u0435\u043d\u044c\u0435, 19 \u0430\u043f\u0440\u0435\u043b\u044f",
-    goodMorning: "\u0414\u043e\u0431\u0440\u043e\u0435 \u0443\u0442\u0440\u043e",
-    friend: "\u0434\u0440\u0443\u0433",
-    dosesLeftToday: "\u043f\u0440\u0438\u0451\u043c\u043e\u0432 \u043e\u0441\u0442\u0430\u043b\u043e\u0441\u044c \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
-    holdToSpeak: "\u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u0438 \u0433\u043e\u0432\u043e\u0440\u0438\u0442\u0435",
-    listening: "\u0421\u043b\u0443\u0448\u0430\u044e\u2026",
-    myMeds: "\u041c\u043e\u0438 \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430",
-    noMeds: "\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432. \u041d\u0430\u0436\u043c\u0438\u0442\u0435 \u00ab+\u00bb, \u0447\u0442\u043e\u0431\u044b \u0434\u043e\u0431\u0430\u0432\u0438\u0442\u044c.",
-    add: "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c",
-    tapToTake: "\u041a\u043e\u0441\u043d\u0438\u0442\u0435\u0441\u044c, \u0447\u0442\u043e\u0431\u044b \u043e\u0442\u043c\u0435\u0442\u0438\u0442\u044c \u043f\u0440\u0438\u0451\u043c",
-    scanRx: "\u0421\u043a\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u043d\u0430\u043f\u0440\u0430\u0432\u043b\u0435\u043d\u0438\u0435",
-    scanRxDesc: "\u0420\u0430\u0441\u043f\u043e\u0437\u043d\u0430\u0442\u044c \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430 \u0441 \u0440\u0435\u0446\u0435\u043f\u0442\u0430 \u0432\u0440\u0430\u0447\u0430",
-    settings: "\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438",
-    profile: "\u041f\u0440\u043e\u0444\u0438\u043b\u044c",
-    pairingQR: "QR-\u043a\u043e\u0434 \u0434\u043b\u044f \u0441\u0432\u044f\u0437\u0438",
-    pairingQRDesc: "\u041f\u043e\u043a\u0430\u0436\u0438\u0442\u0435 \u044d\u0442\u043e\u0442 \u043a\u043e\u0434 \u043f\u043e\u043c\u043e\u0449\u043d\u0438\u043a\u0443",
-    pairingTitle: "\u0421\u0432\u044f\u0437\u044c \u0441 \u043f\u043e\u043c\u043e\u0449\u043d\u0438\u043a\u043e\u043c",
-    notPaired: "\u041f\u043e\u043a\u0430 \u043d\u0435 \u0441\u0432\u044f\u0437\u0430\u043d",
-    pairedWith: "\u0421\u0432\u044f\u0437\u0430\u043d \u0441",
-    language: "\u042f\u0437\u044b\u043a",
-    fontSize: "\u0420\u0430\u0437\u043c\u0435\u0440 \u0448\u0440\u0438\u0444\u0442\u0430",
-    notifications: "\u041d\u0430\u043f\u043e\u043c\u0438\u043d\u0430\u043d\u0438\u044f",
-    voice: "\u0413\u043e\u043b\u043e\u0441\u043e\u0432\u044b\u0435 \u043f\u043e\u0434\u0441\u043a\u0430\u0437\u043a\u0438",
-    help: "\u041f\u043e\u043c\u043e\u0449\u044c",
-    logout: "\u0412\u044b\u0439\u0442\u0438",
-    small: "\u041c\u0430\u043b.",
-    medium: "\u0421\u0440\u0435\u0434.",
-    large: "\u0411\u043e\u043b.",
-    newMed: "\u041d\u043e\u0432\u043e\u0435 \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u043e",
-    medName: "\u041d\u0430\u0437\u0432\u0430\u043d\u0438\u0435",
-    medNamePh: "\u041d\u0430\u043f\u0440\u0438\u043c\u0435\u0440, \u0410\u0441\u043f\u0438\u0440\u0438\u043d",
-    timesPerDay: "\u0420\u0430\u0437 \u0432 \u0434\u0435\u043d\u044c",
-    pillsPerDose: "\u0422\u0430\u0431\u043b\u0435\u0442\u043e\u043a \u0437\u0430 \u043f\u0440\u0438\u0451\u043c",
-    schedule: "\u0420\u0430\u0441\u043f\u0438\u0441\u0430\u043d\u0438\u0435 \u043f\u0440\u0438\u0451\u043c\u0430",
-    save: "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c",
-    cancel: "\u041e\u0442\u043c\u0435\u043d\u0430",
-    morning: "\u0423\u0442\u0440\u043e",
-    noon: "\u0414\u0435\u043d\u044c",
-    evening: "\u0412\u0435\u0447\u0435\u0440",
-    night: "\u041d\u043e\u0447\u044c",
-    scanning: "\u0421\u043a\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435\u2026",
-    detected: "\u041e\u0431\u043d\u0430\u0440\u0443\u0436\u0435\u043d\u043e",
-    addAll: "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u0432\u0441\u0435",
-    added: "\u0414\u043e\u0431\u0430\u0432\u043b\u0435\u043d\u043e!",
-    caregiverHome: "\u0413\u043b\u0430\u0432\u043d\u0430\u044f",
-    adherence: "\u0421\u043e\u0431\u043b\u044e\u0434\u0435\u043d\u0438\u0435",
-    today: "\u0421\u0435\u0433\u043e\u0434\u043d\u044f",
-    upcoming: "\u0411\u043b\u0438\u0436\u0430\u0439\u0448\u0438\u0439 \u043f\u0440\u0438\u0451\u043c",
-    timeline: "\u041b\u0435\u043d\u0442\u0430 \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
-    taken: "\u041f\u0440\u0438\u043d\u044f\u0442\u043e",
-    missed: "\u041f\u0440\u043e\u043f\u0443\u0449\u0435\u043d\u043e",
-    pending: "\u041e\u0436\u0438\u0434\u0430\u0435\u0442",
-    call: "\u041f\u043e\u0437\u0432\u043e\u043d\u0438\u0442\u044c",
-    message: "\u0421\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435",
-    remind: "\u041d\u0430\u043f\u043e\u043c\u043d\u0438\u0442\u044c",
-    meds: "\u041b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430",
-    alerts: "\u041e\u043f\u043e\u0432\u0435\u0449\u0435\u043d\u0438\u044f",
-    connected: "\u0412\u0430\u0448 \u043f\u043e\u0434\u043e\u043f\u0435\u0447\u043d\u044b\u0439",
-    scanQR: "\u0421\u043a\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u0442\u044c QR-\u043a\u043e\u0434",
-    scanQRDesc: "\u041d\u0430\u0432\u0435\u0434\u0438\u0442\u0435 \u043a\u0430\u043c\u0435\u0440\u0443 \u043d\u0430 QR-\u043a\u043e\u0434 \u043f\u043e\u0436\u0438\u043b\u043e\u0433\u043e",
-    align: "\u0421\u043e\u0432\u043c\u0435\u0441\u0442\u0438\u0442\u0435 \u043a\u043e\u0434 \u0432 \u043a\u0432\u0430\u0434\u0440\u0430\u0442\u0435",
-    connect: "\u0421\u0432\u044f\u0437\u0430\u0442\u044c",
-    successPaired: "\u0423\u0441\u043f\u0435\u0448\u043d\u043e \u0441\u0432\u044f\u0437\u0430\u043d\u043e!",
-    elderDemo: "\u041c\u0430\u043c\u0430, \u0415\u043b\u0435\u043d\u0430",
-    now: "\u0421\u0435\u0439\u0447\u0430\u0441",
-    mic: "\u041c\u0438\u043a\u0440\u043e\u0444\u043e\u043d",
-    designReview: "\u0418\u043d\u0442\u0435\u0440\u0430\u043a\u0442\u0438\u0432\u043d\u044b\u0439 \u043f\u0440\u043e\u0442\u043e\u0442\u0438\u043f",
-    allScreens: "\u042d\u043a\u0440\u0430\u043d\u044b",
-    at: "\u0432",
-    pcs: "\u0448\u0442.",
-    nameRequired: "\u0412\u0432\u0435\u0434\u0438\u0442\u0435 \u043d\u0430\u0437\u0432\u0430\u043d\u0438\u0435 \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430",
-    selectAtLeastOne: "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0445\u043e\u0442\u044f \u0431\u044b \u043e\u0434\u043d\u043e \u0432\u0440\u0435\u043c\u044f",
-    reset: "\u0421\u0431\u0440\u043e\u0441 \u0434\u0435\u043c\u043e",
-    tapIcon: "\u041a\u043e\u0441\u043d\u0438\u0442\u0435\u0441\u044c \u0438\u043a\u043e\u043d\u043a\u0438, \u0447\u0442\u043e\u0431\u044b \u0432\u044b\u0431\u0440\u0430\u0442\u044c \u0444\u043e\u0442\u043e",
-    timePicker: "\u0412\u0440\u0435\u043c\u044f",
-    streak: "\u0421\u0435\u0440\u0438\u044f",
-    streakDays: "\u0434\u043d\u0435\u0439 \u043f\u043e\u0434\u0440\u044f\u0434",
-    toCoupon: "\u0434\u043e \u043a\u0443\u043f\u043e\u043d\u0430",
-    plantFlowered: "\u0426\u0432\u0435\u0442\u043e\u043a \u0440\u0430\u0441\u043f\u0443\u0441\u0442\u0438\u043b\u0441\u044f\!",
-    plantWilting: "\u041d\u0435 \u0437\u0430\u0431\u044b\u0432\u0430\u0439\u0442\u0435 \u043f\u0440\u0438\u043d\u0438\u043c\u0430\u0442\u044c",
-    plantGrowing: "\u0426\u0432\u0435\u0442\u043e\u043a \u0440\u0430\u0441\u0442\u0451\u0442",
-    coupons: "\u041a\u0443\u043f\u043e\u043d\u044b",
-    rewards: "\u041d\u0430\u0433\u0440\u0430\u0434\u044b",
-    pharmacy: "\u0410\u043f\u0442\u0435\u043a\u0430",
-    redeem: "\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u043a\u043e\u0434",
-    nextReward: "\u0421\u043b\u0435\u0434\u0443\u044e\u0449\u0430\u044f \u043d\u0430\u0433\u0440\u0430\u0434\u0430",
-    myPlant: "\u041c\u043e\u0439 \u0446\u0432\u0435\u0442\u043e\u043a",
-    elderPlant: "\u0426\u0432\u0435\u0442\u043e\u043a \u043f\u043e\u0434\u043e\u043f\u0435\u0447\u043d\u043e\u0433\u043e",
-    keepStreak: "\u041d\u0435 \u043f\u0440\u0435\u0440\u044b\u0432\u0430\u0439\u0442\u0435 \u0441\u0435\u0440\u0438\u044e\!",
-    couponAvailable: "\u0415\u0441\u0442\u044c \u043d\u043e\u0432\u044b\u0439 \u043a\u0443\u043f\u043e\u043d\!",
-    discount10: "\u0421\u043a\u0438\u0434\u043a\u0430 10% \u0432 \u0430\u043f\u0442\u0435\u043a\u0435",
-    discount25: "\u0421\u043a\u0438\u0434\u043a\u0430 25% \u0432 \u0430\u043f\u0442\u0435\u043a\u0435",
-    discount10Desc: "\u041d\u0430 \u043b\u044e\u0431\u044b\u0435 \u043f\u0440\u0435\u043f\u0430\u0440\u0430\u0442\u044b",
-    discount25Desc: "\u041d\u0430 \u0432\u0430\u0448\u0438 \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430",
-    noRewards: "\u041f\u043e\u043a\u0430 \u043d\u0435\u0442 \u043d\u0430\u0433\u0440\u0430\u0434. \u041f\u0440\u043e\u0434\u043e\u043b\u0436\u0430\u0439\u0442\u0435 \u0432 \u0442\u043e\u043c \u0436\u0435 \u0434\u0443\u0445\u0435\!",
-    water: "\u041f\u043e\u043b\u0435\u0439\u0442\u0435 \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430\u043c\u0438",
-    flourishing: "\u041f\u0440\u043e\u0446\u0432\u0435\u0442\u0430\u0435\u0442",
-    day7: "7 \u0434\u043d\u0435\u0439",
-    day14: "14 \u0434\u043d\u0435\u0439",
-    unlockAt: "\u0420\u0430\u0437\u0431\u043b\u043e\u043a\u0438\u0440\u0443\u0435\u0442\u0441\u044f \u043d\u0430",
-    locked: "\u0417\u0430\u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u043d\u043e",
-    unlocked: "\u0420\u0430\u0437\u0431\u043b\u043e\u043a\u0438\u0440\u043e\u0432\u0430\u043d\u043e",
-    myRewards: "\u041c\u043e\u0438 \u043d\u0430\u0433\u0440\u0430\u0434\u044b",
-    activeCoupon: "\u0410\u043a\u0442\u0438\u0432\u043d\u044b\u0439 \u043a\u0443\u043f\u043e\u043d",
-    viewAll: "\u0412\u0441\u0435",
-    greatJob: "\u041e\u0442\u043b\u0438\u0447\u043d\u043e\!",
-    rewardsScreen: "\u041d\u0430\u0433\u0440\u0430\u0434\u044b",
-    showCode: "\u041f\u043e\u043a\u0430\u0437\u0430\u0442\u044c \u043a\u043e\u0434 \u0432 \u0430\u043f\u0442\u0435\u043a\u0435",
-    expires: "\u0414\u0435\u0439\u0441\u0442\u0432\u0443\u0435\u0442 \u0434\u043e",
-    validIn: "\u0412 \u043b\u044e\u0431\u043e\u0439 \u0430\u043f\u0442\u0435\u043a\u0435-\u043f\u0430\u0440\u0442\u043d\u0451\u0440\u0435",
-    plantStage: "\u0421\u0442\u0430\u0434\u0438\u044f \u0440\u043e\u0441\u0442\u0430",
-    todayDone: "\u0432\u044b\u043f\u043e\u043b\u043d\u0435\u043d\u043e \u0441\u0435\u0433\u043e\u0434\u043d\u044f",
-    plantCard: "\u0421\u0430\u0434\u0438\u043a \u0437\u0434\u043e\u0440\u043e\u0432\u044c\u044f",
-    seed: "\u0421\u0435\u043c\u044f",
-    sprout: "\u0420\u043e\u0441\u0442\u043e\u043a",
-    sapling: "\u0421\u0430\u0436\u0435\u043d\u0435\u0446",
-    bush: "\u041a\u0443\u0441\u0442",
-    bloom: "\u0426\u0432\u0435\u0442\u0435\u043d\u0438\u0435",
+    appName: "SafeStep",
+    tagline: "Всегда знайте, что они в безопасности",
+    createAccount: "Создать аккаунт",
+    first: "Имя",
+    last: "Фамилия",
+    email: "Электронная почта",
+    password: "Пароль",
+    continue: "Продолжить",
+    back: "Назад",
+    chooseRole: "Кто вы?",
+    caregiver: "Помощник",
+    caregiverDesc: "Слежу за близким",
+    elder: "Пожилой",
+    elderDesc: "За мной присматривают",
+    home: "Дома",
+    outdoor: "На улице",
+    unusual: "Тревога",
+    riskScore: "Риск-скор",
+    lastSeen: "Последнее обновление",
+    gpsUpdate: "GPS",
+    battery: "Батарея",
+    viewMap: "Карта",
+    setZones: "Зоны",
+    aiInsights: "ИИ",
+    alerts: "Оповещения",
+    settings: "Настройки",
+    safeZone: "Безопасная зона",
+    homeLocation: "Домашний адрес",
+    zoneRadius: "Радиус зоны",
+    curfewHours: "Комендантский час",
+    addZone: "Добавить зону",
+    alertHistory: "История оповещений",
+    newZoneTitle: "Новое место",
+    newZoneDesc: "Елена была здесь 45 мин",
+    addToSafeZone: "Добавить в безопасную зону?",
+    yes: "Да, добавить",
+    no: "Нет, игнорировать",
+    unusualBehavior: "Необычное поведение",
+    activeAlert: "Активная тревога",
+    callElder: "Позвонить Елене",
+    aiCall: "ИИ-звонок",
+    dismiss: "Отклонить",
+    aiCalling: "ИИ звонит...",
+    aiCallDesc: "ИИ мягко уточняет, всё ли хорошо",
+    endCall: "Завершить звонок",
+    behaviorML: "Анализ поведения",
+    usualWalkTimes: "Обычное время прогулок",
+    usualPlaces: "Привычные места",
+    sleepPattern: "Режим сна",
+    anomaly: "Аномалия",
+    modelConfidence: "Точность модели",
+    fallDetected: "Обнаружено падение!",
+    fallLocation: "Ул. Ленина 45 · Только что",
+    fallAnalysis: "Анализ микрофона: нестандартные звуки",
+    call112: "Позвонить 112",
+    contactCaretaker: "Связаться с помощником",
+    elderHome: "Доброе утро, Елена!",
+    iAmHome: "Я дома",
+    sos: "SOS",
+    reset: "Сброс демо",
+    language: "Язык",
+    fontSize: "Размер шрифта",
+    small: "Мал.",
+    medium: "Ср.",
+    large: "Бол.",
+    logout: "Выйти",
+    curfew: "Комендантский час",
+    aiCallToggle: "ИИ-звонок при тревоге",
+    fallDetection: "Детекция падений",
+    emergencyContact: "Экстренный контакт",
+    pairedDevice: "Устройство",
+    profile: "Профиль",
+    designReview: "Интерактивный прототип",
+    allScreens: "Экраны",
+    nightWalk: "Ночная прогулка",
+    noUsualRoute: "Нет привычного маршрута",
+    walkingCircles: "Ходьба по кругу",
+    suddenStop: "Резкая остановка",
+    longAbsence: "Долгое отсутствие",
+    riskExplain: "Score > 70 → отправить алерт",
+    lowPower: "Режим экономии",
+    lowPowerDesc: "Батарея 15% — переключение на альтернативное позиционирование",
+    wifiPos: "Wi-Fi позиционирование",
+    cellTowers: "Вышки сотовой связи",
+    bleBeacons: "BLE маяки",
+    ins: "Инерциальная навигация",
+    tipTitle: "Совет помощнику",
+    tipDesc: "Если телефон разрядился — используйте Find My для отслеживания",
+    at: "в",
+    minAgo: "мин назад",
+    modeHome: "Режим: Дома",
+    modeOutdoor: "Режим: На улице",
+    modeUnusual: "Режим: Тревога",
+    everyMin: "каждые 2 мин",
+    everySec: "каждые 45 сек",
+    every15: "каждые 15 мин",
+    connectedTo: "Подключено",
+    elderName: "Мама, Елена",
+    uploadPhoto: "Нажмите для фото",
+    walkDuration: "Прогулка",
+    min: "мин",
+    zoneAdded: "Зона добавлена!",
+    todayActivity: "Активность сегодня",
+    usualSleep: "22:00 — 07:00",
+    aiTranscript: "ИИ: Елена, добрый вечер. Скажите, вы хорошо себя чувствуете? Не заблудились?",
+    elderReply: "Елена: Да, я... кажется, не знаю где я...",
+    aiReply2: "ИИ: Всё хорошо, я рядом. Помощник уже оповещён. Оставайтесь на месте.",
+    sensors: "Датчики активны",
+    accel: "Акселерометр",
+    gyro: "Гироскоп",
+    mic2: "Микрофон",
+    gpsLive: "GPS",
+    crashSound: "Звук удара",
+    heavyBreath: "Учащённое дыхание",
+    noSound: "Подозрительных звуков нет",
+    safeZoneLabel: "Безопасная зона",
+    homePinLabel: "Дом",
+    elenaLabel: "Елена · Сейчас",
+    parkLabel: "Парк",
+    wanderingPath: "Маршрут блуждания",
+    addSafeZoneBtn: "+ Добавить зону",
+    radiusLabel: "500 м",
+    curfewFrom: "23:00",
+    curfewTo: "06:00",
+    homeAddress: "Ул. Ленина 45, кв. 12",
+    sleepTime: "22:00 – 07:00",
+    highRisk: "Высокий риск",
+    medRisk: "Средний риск",
+    lowRisk: "Низкий риск",
   },
   en: {
-    tagline: "Never miss a dose",
+    appName: "SafeStep",
+    tagline: "Always know they're safe",
     createAccount: "Create account",
     first: "First name",
     last: "Last name",
     email: "Email",
     password: "Password",
-    uploadPhoto: "Tap to upload photo",
     continue: "Continue",
     back: "Back",
     chooseRole: "Who are you?",
-    elder: "Elder",
-    elderDesc: "I take medications",
     caregiver: "Caregiver",
     caregiverDesc: "I help a loved one",
-    elderType: "How will you use it?",
-    solo: "Solo",
-    soloDesc: "I manage on my own",
-    withCare: "With caregiver",
-    withCareDesc: "Someone helps me",
-    sunday: "Sunday, April 19",
-    goodMorning: "Good morning",
-    friend: "friend",
-    dosesLeftToday: "doses left today",
-    holdToSpeak: "Hold to speak",
-    listening: "Listening\u2026",
-    myMeds: "My medications",
-    noMeds: "No medications yet. Tap \u201c+\u201d to add one.",
-    add: "Add",
-    tapToTake: "Tap a pill card to mark a dose",
-    scanRx: "Scan prescription",
-    scanRxDesc: "Recognize meds from a doctor's slip",
+    elder: "Elder",
+    elderDesc: "Someone helps me",
+    home: "Home",
+    outdoor: "Outdoor",
+    unusual: "Alert",
+    riskScore: "Risk Score",
+    lastSeen: "Last update",
+    gpsUpdate: "GPS",
+    battery: "Battery",
+    viewMap: "Map",
+    setZones: "Zones",
+    aiInsights: "AI",
+    alerts: "Alerts",
     settings: "Settings",
-    profile: "Profile",
-    pairingQR: "Pairing QR code",
-    pairingQRDesc: "Show this code to your caregiver",
-    pairingTitle: "Caregiver pairing",
-    notPaired: "Not paired yet",
-    pairedWith: "Paired with",
+    safeZone: "Safe Zone",
+    homeLocation: "Home address",
+    zoneRadius: "Zone radius",
+    curfewHours: "Curfew hours",
+    addZone: "Add zone",
+    alertHistory: "Alert history",
+    newZoneTitle: "New location",
+    newZoneDesc: "Elena was here for 45 min",
+    addToSafeZone: "Add to safe zone?",
+    yes: "Yes, add it",
+    no: "No, ignore",
+    unusualBehavior: "Unusual Behavior",
+    activeAlert: "Active Alert",
+    callElder: "Call Elena",
+    aiCall: "AI Call",
+    dismiss: "Dismiss",
+    aiCalling: "AI calling...",
+    aiCallDesc: "AI is gently checking on Elena",
+    endCall: "End call",
+    behaviorML: "Behavior Analysis",
+    usualWalkTimes: "Usual walk times",
+    usualPlaces: "Usual places",
+    sleepPattern: "Sleep pattern",
+    anomaly: "Anomaly",
+    modelConfidence: "Model confidence",
+    fallDetected: "Fall Detected!",
+    fallLocation: "Lenin St 45 · Just now",
+    fallAnalysis: "Microphone: unusual sounds detected",
+    call112: "Call 911",
+    contactCaretaker: "Contact caretaker",
+    elderHome: "Good morning, Elena!",
+    iAmHome: "I'm home safely",
+    sos: "SOS",
+    reset: "Reset demo",
     language: "Language",
     fontSize: "Font size",
-    notifications: "Reminders",
-    voice: "Voice prompts",
-    help: "Help",
-    logout: "Log out",
     small: "Sm",
     medium: "Md",
     large: "Lg",
-    newMed: "New medication",
-    medName: "Name",
-    medNamePh: "e.g. Aspirin",
-    timesPerDay: "Times per day",
-    pillsPerDose: "Pills per dose",
-    schedule: "Schedule",
-    save: "Save",
-    cancel: "Cancel",
-    morning: "Morning",
-    noon: "Noon",
-    evening: "Evening",
-    night: "Night",
-    scanning: "Scanning\u2026",
-    detected: "Detected",
-    addAll: "Add all",
-    added: "Added!",
-    caregiverHome: "Home",
-    adherence: "Adherence",
-    today: "Today",
-    upcoming: "Upcoming",
-    timeline: "Today's timeline",
-    taken: "Taken",
-    missed: "Missed",
-    pending: "Pending",
-    call: "Call",
-    message: "Message",
-    remind: "Remind",
-    meds: "Meds",
-    alerts: "Alerts",
-    connected: "Your elder",
-    scanQR: "Scan QR code",
-    scanQRDesc: "Point camera at elder's QR",
-    align: "Align the code inside the square",
-    connect: "Pair",
-    successPaired: "Successfully paired!",
-    elderDemo: "Mom, Elena",
-    now: "Now",
-    mic: "Mic",
+    logout: "Log out",
+    curfew: "Curfew",
+    aiCallToggle: "AI call on alert",
+    fallDetection: "Fall detection",
+    emergencyContact: "Emergency contact",
+    pairedDevice: "Device",
+    profile: "Profile",
     designReview: "Interactive prototype",
     allScreens: "Screens",
+    nightWalk: "Night walk",
+    noUsualRoute: "No usual route",
+    walkingCircles: "Walking in circles",
+    suddenStop: "Sudden stop",
+    longAbsence: "Long absence",
+    riskExplain: "Score > 70 → send alert",
+    lowPower: "Low Power Mode",
+    lowPowerDesc: "15% battery — switching to alternative positioning",
+    wifiPos: "Wi-Fi positioning",
+    cellTowers: "Cell towers",
+    bleBeacons: "BLE beacons",
+    ins: "Inertial navigation",
+    tipTitle: "Tip for caregiver",
+    tipDesc: "If phone dies — use Find My to locate Elena",
     at: "at",
-    pcs: "pcs",
-    nameRequired: "Please enter a medication name",
-    selectAtLeastOne: "Pick at least one time slot",
-    reset: "Reset demo",
-    tapIcon: "Tap the icon to choose a photo",
-    timePicker: "Time",
-    streak: "Streak",
-    streakDays: "days in a row",
-    toCoupon: "to coupon",
-    plantFlowered: "In full bloom\!",
-    plantWilting: "Don't forget your doses",
-    plantGrowing: "Plant is growing",
-    coupons: "Coupons",
-    rewards: "Rewards",
-    pharmacy: "Pharmacy",
-    redeem: "Show code",
-    nextReward: "Next reward",
-    myPlant: "My plant",
-    elderPlant: "Elder's plant",
-    keepStreak: "Keep your streak\!",
-    couponAvailable: "New coupon available\!",
-    discount10: "10% off at pharmacy",
-    discount25: "25% off at pharmacy",
-    discount10Desc: "On any medication",
-    discount25Desc: "On your prescriptions",
-    noRewards: "No rewards yet. Keep it up\!",
-    water: "Water with medications",
-    flourishing: "Flourishing",
-    day7: "7 days",
-    day14: "14 days",
-    unlockAt: "Unlocks at",
-    locked: "Locked",
-    unlocked: "Unlocked",
-    myRewards: "My rewards",
-    activeCoupon: "Active coupon",
-    viewAll: "All",
-    greatJob: "Great job\!",
-    rewardsScreen: "Rewards",
-    showCode: "Show code at pharmacy",
-    expires: "Valid through",
-    validIn: "At any partner pharmacy",
-    plantStage: "Growth stage",
-    todayDone: "done today",
-    plantCard: "Health garden",
-    seed: "Seed",
-    sprout: "Sprout",
-    sapling: "Sapling",
-    bush: "Bush",
-    bloom: "Bloom",
+    minAgo: "min ago",
+    modeHome: "Mode: Home",
+    modeOutdoor: "Mode: Outdoor",
+    modeUnusual: "Mode: Alert",
+    everyMin: "every 2 min",
+    everySec: "every 45 sec",
+    every15: "every 15 min",
+    connectedTo: "Connected",
+    elderName: "Mom, Elena",
+    uploadPhoto: "Tap to upload photo",
+    walkDuration: "Walk",
+    min: "min",
+    zoneAdded: "Zone added!",
+    todayActivity: "Today's activity",
+    usualSleep: "10:00 PM — 7:00 AM",
+    aiTranscript: "AI: Elena, good evening. Are you feeling okay? Are you lost?",
+    elderReply: "Elena: Yes, I... I'm not sure where I am...",
+    aiReply2: "AI: Everything's okay, I'm here. Your caregiver has been notified. Please stay where you are.",
+    sensors: "Sensors active",
+    accel: "Accelerometer",
+    gyro: "Gyroscope",
+    mic2: "Microphone",
+    gpsLive: "GPS",
+    crashSound: "Crash sound",
+    heavyBreath: "Heavy breathing",
+    noSound: "No suspicious sounds",
+    safeZoneLabel: "Safe Zone",
+    homePinLabel: "Home",
+    elenaLabel: "Elena · Now",
+    parkLabel: "Park",
+    wanderingPath: "Wandering path",
+    addSafeZoneBtn: "+ Add Zone",
+    radiusLabel: "500 m",
+    curfewFrom: "11:00 PM",
+    curfewTo: "6:00 AM",
+    homeAddress: "Lenin St 45, apt 12",
+    sleepTime: "10 PM – 7 AM",
+    highRisk: "High risk",
+    medRisk: "Medium risk",
+    lowRisk: "Low risk",
   },
 };
 
-const INITIAL_MEDS = [
-  { id: 1, name: "\u0413\u043b\u0438\u043a\u043e\u043d\u0438\u043b",     taken: 1, total: 2, color: PALETTE[0], time: "08:00" },
-  { id: 2, name: "\u0422\u0430\u0433\u043b\u0438\u043d",       taken: 2, total: 3, color: PALETTE[1], time: "09:00" },
-  { id: 3, name: "\u0412\u0438\u0441\u0438\u043f\u0440\u043e\u043b\u043e\u043b",   taken: 1, total: 4, color: PALETTE[2], time: "10:00" },
-  { id: 4, name: "\u041a\u0430\u043d\u0442\u0430\u0431",       taken: 3, total: 3, color: PALETTE[3], time: "12:00" },
-  { id: 5, name: "\u0422\u0440\u043e\u043c\u0431\u043e\u043f\u043e\u043b",    taken: 0, total: 1, color: PALETTE[4], time: "14:00" },
-  { id: 6, name: "\u0410\u0442\u043e\u0440\u0432\u0430\u0441\u0442\u0430\u0442\u0438\u043d", taken: 0, total: 1, color: PALETTE[5], time: "18:00" },
-  { id: 7, name: "\u0418\u043d\u0432\u043e\u043a\u0430\u043d\u0430",     taken: 0, total: 2, color: PALETTE[6], time: "20:00" },
-  { id: 8, name: "\u0410\u043d\u0442\u0430\u0440\u0438\u0441",      taken: 0, total: 1, color: PALETTE[7], time: "21:00" },
-  { id: 9, name: "\u0413\u0430\u043b\u044c\u0432\u0443\u0441",      taken: 0, total: 2, color: PALETTE[8], time: "22:00" },
-];
-
-const DEFAULT_TIME = "08:00";
-
-const normalizeTime = (value) =>
-  typeof value === "string" && /^\d{2}:\d{2}$/.test(value) ? value : DEFAULT_TIME;
-
-const sortSchedule = (schedule = []) =>
-  [...schedule].sort((a, b) => normalizeTime(a.time).localeCompare(normalizeTime(b.time)));
-
-const buildMedication = (med, fallbackColor = PALETTE[0]) => {
-  const rawSchedule =
-    Array.isArray(med.schedule) && med.schedule.length > 0
-      ? med.schedule
-      : [{ key: "primary", time: med.time ?? DEFAULT_TIME }];
-
-  const schedule = sortSchedule(
-    rawSchedule.map((slot, index) => ({
-      key: slot.key || `slot-${index + 1}`,
-      label: slot.label || "",
-      time: normalizeTime(slot.time),
-    }))
-  );
-
-  const total = Math.max(1, Number(med.total) || schedule.length || 1);
-  const pillsPerDose = Math.max(
-    1,
-    Number(med.pillsPerDose) || Math.ceil(total / Math.max(schedule.length, 1))
-  );
-
-  return {
-    ...med,
-    color: med.color || fallbackColor,
-    time: schedule[0]?.time || DEFAULT_TIME,
-    taken: Math.min(Math.max(0, Number(med.taken) || 0), total),
-    total,
-    pillsPerDose,
-    schedule,
-  };
-};
-
-const buildInitialMeds = () =>
-  INITIAL_MEDS.map((med, index) => buildMedication(med, med.color || PALETTE[index % PALETTE.length]));
-
-const getMedicationTimes = (med) => sortSchedule(med.schedule).map((slot) => slot.time);
-
-const getMedicationTimesText = (med) => getMedicationTimes(med).join(", ");
-
-/* ---------- reusable bits ---------- */
-
-function CircleProgress({ value, total, color, size = 58, stroke = 6, children }) {
-  const r = (size - stroke) / 2;
-  const c = 2 * Math.PI * r;
-  const pct = total > 0 ? Math.min(1, value / total) : 0;
-  const offset = c * (1 - pct);
-  return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg width={size} height={size} style={{ transform: "rotate(-90deg)" }}>
-        <circle cx={size / 2} cy={size / 2} r={r} stroke={LINE} strokeWidth={stroke} fill="none" />
-        <circle
-          cx={size / 2} cy={size / 2} r={r}
-          stroke={color} strokeWidth={stroke} fill="none"
-          strokeDasharray={c} strokeDashoffset={offset}
-          strokeLinecap="round"
-          style={{ transition: "stroke-dashoffset .5s ease" }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center" style={{ color: TEXT, fontWeight: 700 }}>
-        {children ?? `${value}/${total}`}
-      </div>
-    </div>
-  );
-}
-function FakeQR({ size = 180 }) {
-  const cells = 21;
-  const grid = [];
-  for (let y = 0; y < cells; y++) {
-    for (let x = 0; x < cells; x++) {
-      const corner =
-        (x < 7 && y < 7) || (x >= cells - 7 && y < 7) || (x < 7 && y >= cells - 7);
-      const on = corner
-        ? (x === 0 || x === 6 || y === 0 || y === 6 || (x >= 2 && x <= 4 && y >= 2 && y <= 4))
-        : ((x * 31 + y * 17 + (x ^ y) * 7) % 3 === 0);
-      if (on) grid.push({ x, y });
-    }
-  }
-  const s = size / cells;
-  return (
-    <svg width={size} height={size} style={{ background: "#fff", borderRadius: 12 }}>
-      {grid.map((g, i) => (
-        <rect key={i} x={g.x * s} y={g.y * s} width={s} height={s} fill={TEXT} />
-      ))}
-    </svg>
-  );
-}
-
-function TopBar({ title, right, onBack }) {
-  return (
-    <div className="flex items-center justify-between px-5 pt-12 pb-3">
-      <div className="w-10 h-10 flex items-center justify-center">
-        {onBack && (
-          <button onClick={onBack} className="w-10 h-10 rounded-full flex items-center justify-center border" style={{ background: CARD }}>
-            <ArrowLeft size={20} color={TEXT} />
-          </button>
-        )}
-      </div>
-      <div style={{ color: TEXT }} className="text-base font-semibold">{title}</div>
-      <div className="w-10 h-10 flex items-center justify-center">{right}</div>
-    </div>
-  );
-}
+/* ===================== REUSABLE COMPONENTS ===================== */
 
 function PhoneFrame({ children }) {
   return (
@@ -459,17 +323,29 @@ function PhoneFrame({ children }) {
   );
 }
 
-function PrimaryButton({ children, onClick, style, icon, disabled }) {
+function TopBar({ title, right, onBack }) {
+  return (
+    <div className="flex items-center justify-between px-5 pt-12 pb-3">
+      <div className="w-10 h-10 flex items-center justify-center">
+        {onBack && (
+          <button onClick={onBack} className="w-10 h-10 rounded-full flex items-center justify-center border" style={{ background: CARD }}>
+            <ArrowLeft size={20} color={TEXT} />
+          </button>
+        )}
+      </div>
+      <div style={{ color: TEXT }} className="text-base font-semibold">{title}</div>
+      <div className="w-10 h-10 flex items-center justify-center">{right}</div>
+    </div>
+  );
+}
+
+function PrimaryButton({ children, onClick, style, icon, disabled, color }) {
+  const bg = disabled ? "#ffc79c" : (color || BRAND);
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      style={{
-        background: disabled ? "#ffc79c" : BRAND,
-        color: "#fff",
-        cursor: disabled ? "not-allowed" : "pointer",
-        ...style,
-      }}
+      style={{ background: bg, color: "#fff", cursor: disabled ? "not-allowed" : "pointer", ...style }}
       className="w-full rounded-2xl py-4 font-semibold text-lg flex items-center justify-center gap-2 shadow-md"
     >
       {icon}{children}
@@ -477,11 +353,11 @@ function PrimaryButton({ children, onClick, style, icon, disabled }) {
   );
 }
 
-function GhostButton({ children, onClick, icon }) {
+function GhostButton({ children, onClick, icon, danger }) {
   return (
     <button
       onClick={onClick}
-      style={{ background: CARD, color: TEXT }}
+      style={{ background: CARD, color: danger ? RED : TEXT }}
       className="w-full rounded-2xl py-4 font-semibold text-lg flex items-center justify-center gap-2 border"
     >
       {icon}{children}
@@ -502,11 +378,7 @@ function Field({ label, placeholder, type = "text", value, onChange, right, onRi
         className="w-full rounded-2xl px-4 py-3 text-base outline-none border"
       />
       {right && (
-        <button
-          onClick={onRightClick}
-          type="button"
-          className="absolute right-3 top-9 w-8 h-8 flex items-center justify-center"
-        >
+        <button onClick={onRightClick} type="button" className="absolute right-3 top-9 w-8 h-8 flex items-center justify-center">
           {right}
         </button>
       )}
@@ -514,7 +386,7 @@ function Field({ label, placeholder, type = "text", value, onChange, right, onRi
   );
 }
 
-function SettingsRow({ icon, label, value, onClick, danger }) {
+function SettingsRow({ icon, label, value, onClick, danger, toggle, toggled }) {
   return (
     <button
       onClick={onClick}
@@ -522,17 +394,19 @@ function SettingsRow({ icon, label, value, onClick, danger }) {
       className="w-full rounded-2xl px-4 py-4 flex items-center justify-between border mb-2"
     >
       <div className="flex items-center gap-3">
-        <div
-          style={{ background: danger ? "#fee2e2" : BRAND_SOFT, color: danger ? RED : BRAND }}
-          className="w-9 h-9 rounded-xl flex items-center justify-center"
-        >
+        <div style={{ background: danger ? "#fee2e2" : BRAND_SOFT, color: danger ? RED : BRAND }} className="w-9 h-9 rounded-xl flex items-center justify-center">
           {icon}
         </div>
         <span className="font-medium">{label}</span>
       </div>
       <div className="flex items-center gap-2" style={{ color: SUB }}>
         {value && <span className="text-sm">{value}</span>}
-        {!danger && <ChevronRight size={18} />}
+        {toggle && (
+          <div style={{ background: toggled ? GREEN : LINE, transition: "background .2s" }} className="w-11 h-6 rounded-full relative">
+            <div style={{ left: toggled ? 22 : 2, transition: "left .2s", top: 2, position: "absolute", width: 20, height: 20, background: "#fff", borderRadius: "50%" }} />
+          </div>
+        )}
+        {!danger && !toggle && <ChevronRight size={18} />}
       </div>
     </button>
   );
@@ -541,1361 +415,1120 @@ function SettingsRow({ icon, label, value, onClick, danger }) {
 function Toast({ text, show }) {
   if (!show) return null;
   return (
-    <div
-      style={{
-        position: "absolute", left: "50%", bottom: 30,
-        transform: "translateX(-50%)",
-        background: TEXT, color: "#fff",
-        padding: "10px 18px", borderRadius: 999, zIndex: 70,
-        boxShadow: "0 10px 30px rgba(0,0,0,.25)",
-        fontWeight: 600,
-      }}
-      className="text-sm flex items-center gap-2"
-    >
+    <div style={{ position: "absolute", left: "50%", bottom: 30, transform: "translateX(-50%)", background: TEXT, color: "#fff", padding: "10px 18px", borderRadius: 999, zIndex: 70, boxShadow: "0 10px 30px rgba(0,0,0,.25)", fontWeight: 600 }}
+      className="text-sm flex items-center gap-2">
       <Check size={16} color={GREEN} /> {text}
     </div>
   );
 }
 
-/* =========================================================
-                        APP
-   ========================================================= */
+function StatusBadge({ mode, t }) {
+  const cfg = {
+    home:    { bg: "#d1fae5", color: GREEN,  icon: <Home size={13} />,          label: t.home },
+    outdoor: { bg: "#dbeafe", color: BLUE,   icon: <Navigation size={13} />,    label: t.outdoor },
+    unusual: { bg: "#fee2e2", color: RED,    icon: <AlertTriangle size={13} />, label: t.unusual },
+  }[mode] || { bg: "#d1fae5", color: GREEN, icon: <Home size={13} />, label: t.home };
+  return (
+    <div style={{ background: cfg.bg, color: cfg.color }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold">
+      {cfg.icon} {cfg.label}
+    </div>
+  );
+}
 
-function Plant({ adherence = 1, size = 150 }) {
-  // adherence: 0..1 of today's doses taken. Drives growth stage + wilt.
-  const pct = Math.max(0, Math.min(1, adherence));
-  // 0..4 stages: seed, sprout, sapling, bush, bloom
-  const stage = pct >= 1 ? 4 : pct >= 0.75 ? 3 : pct >= 0.5 ? 2 : pct >= 0.2 ? 1 : 0;
-  const wilt = pct < 0.5;
-  const stemColor = wilt ? "#9ca3af" : "#15803d";
-  const leafColor = wilt ? "#a8b3a5" : "#22c55e";
-  const leafDark = wilt ? "#8a9589" : "#16a34a";
-  const potColor = "#c2410c";
-  const potDark = "#9a3412";
-  const soilColor = "#78350f";
-  const flowerColor = "#ff7d29";
-  const flowerCenter = "#fde047";
+function ModeBanner({ mode, t }) {
+  const cfg = {
+    home:    { bg: GREEN,  label: t.modeHome,    sub: t.every15 },
+    outdoor: { bg: BLUE,   label: t.modeOutdoor, sub: t.everyMin },
+    unusual: { bg: RED,    label: t.modeUnusual, sub: t.everySec },
+  }[mode] || { bg: GREEN, label: t.modeHome, sub: t.every15 };
+  return (
+    <div style={{ background: cfg.bg + "18", borderLeft: `4px solid ${cfg.bg}`, color: cfg.bg }} className="mx-5 rounded-xl px-4 py-3 flex items-center justify-between mb-3">
+      <div className="font-bold text-sm">{cfg.label}</div>
+      <div className="text-xs opacity-80">{cfg.sub}</div>
+    </div>
+  );
+}
 
-  // Heights per stage
-  const stemHeight = [0, 18, 40, 60, 75][stage];
-  const stemDroop = wilt ? 8 : 0;
+/* ===================== MAP COMPONENT ===================== */
+
+function FakeMap({ mode = "home", showPath = true, showZone = true, compact = false }) {
+  const W = 370, H = compact ? 180 : 240;
+  const homeX = 175, homeY = compact ? 100 : 130;
+  const zoneR = compact ? 55 : 72;
+
+  const outdoorPath = [
+    [homeX, homeY],
+    [homeX + 25, homeY - 22],
+    [homeX + 55, homeY - 30],
+    [homeX + 80, homeY - 18],
+    [homeX + 95, homeY + 5],
+    [homeX + 80, homeY + 28],
+    [homeX + 55, homeY + 38],
+    [homeX + 35, homeY + 50],
+  ];
+  const unusualPath = [
+    [homeX, homeY],
+    [homeX + 25, homeY - 20],
+    [homeX + 50, homeY - 30],
+    [homeX + 75, homeY - 15],
+    [homeX + 90, homeY + 10],
+    [homeX + 70, homeY + 35],
+    [homeX + 45, homeY + 45],
+    [homeX + 25, homeY + 30],
+    [homeX + 15, homeY + 10],
+    [homeX + 30, homeY - 5],
+    [homeX + 55, homeY - 20],
+    [homeX + 78, homeY + 0],
+  ];
+
+  const path = mode === "home" ? [[homeX, homeY]] : mode === "unusual" ? unusualPath : outdoorPath;
+  const elderX = path[path.length - 1][0];
+  const elderY = path[path.length - 1][1];
+  const pathD = path.map((p, i) => `${i === 0 ? "M" : "L"} ${p[0]} ${p[1]}`).join(" ");
+
+  const pathColor = mode === "unusual" ? RED : BLUE;
 
   return (
-    <svg width={size} height={size} viewBox="0 0 150 150">
-      {/* Pot */}
-      <path d="M 45 120 L 50 145 L 100 145 L 105 120 Z" fill={potColor} />
-      <rect x="42" y="115" width="66" height="10" rx="2" fill={potDark} />
-      <ellipse cx="75" cy="118" rx="30" ry="4" fill={soilColor} />
+    <svg width={W} height={H} style={{ borderRadius: 16, display: "block" }}>
+      {/* Base */}
+      <rect width={W} height={H} fill="#e8ecf0" />
 
-      {/* Stage 0: just a seed */}
-      {stage === 0 && (
-        <ellipse cx="75" cy="115" rx="4" ry="3" fill="#78350f" />
+      {/* Buildings */}
+      <rect x={8} y={8} width={55} height={38} rx={4} fill="#cdd2d9" />
+      <rect x={72} y={8} width={65} height={28} rx={4} fill="#cdd2d9" />
+      <rect x={200} y={8} width={55} height={42} rx={4} fill="#cdd2d9" />
+      <rect x={268} y={8} width={70} height={32} rx={4} fill="#cdd2d9" />
+      <rect x={330} y={48} width={40} height={55} rx={4} fill="#cdd2d9" />
+      <rect x={8} y={H - 60} width={65} height={52} rx={4} fill="#cdd2d9" />
+      <rect x={105} y={H - 50} width={58} height={42} rx={4} fill="#cdd2d9" />
+      <rect x={240} y={H - 55} width={80} height={47} rx={4} fill="#cdd2d9" />
+      <rect x={330} y={H - 62} width={40} height={54} rx={4} fill="#cdd2d9" />
+
+      {/* Streets horizontal */}
+      <rect x={0} y={50} width={W} height={13} fill="#fff" opacity={0.9} />
+      <rect x={0} y={H - 62} width={W} height={13} fill="#fff" opacity={0.9} />
+
+      {/* Streets vertical */}
+      <rect x={68} y={0} width={13} height={H} fill="#fff" opacity={0.9} />
+      <rect x={185} y={0} width={13} height={H} fill="#fff" opacity={0.9} />
+      <rect x={285} y={0} width={13} height={H} fill="#fff" opacity={0.9} />
+
+      {/* Park */}
+      <rect x={90} y={70} width={85} height={compact ? 55 : 70} rx={10} fill="#bbf7d0" />
+      <text x={132} y={compact ? 100 : 110} fontSize={9} fill="#15803d" textAnchor="middle" fontWeight="600">🌳 Park</text>
+
+      {/* Safe zone */}
+      {showZone && (
+        <circle cx={homeX} cy={homeY} r={zoneR} fill="#22c55e" fillOpacity={0.1} stroke="#22c55e" strokeWidth={2} strokeDasharray="7 5" />
       )}
 
-      {/* Stem and leaves for stage >= 1 */}
-      {stage >= 1 && (
-        <g>
-          <path
-            d={`M 75 115 Q ${75 + stemDroop} ${115 - stemHeight/2} 75 ${115 - stemHeight}`}
-            stroke={stemColor}
-            strokeWidth="3"
-            fill="none"
-            strokeLinecap="round"
-          />
-        </g>
+      {/* Walk path */}
+      {showPath && path.length > 1 && (
+        <path d={pathD} fill="none" stroke={pathColor} strokeWidth={3} strokeDasharray={mode === "unusual" ? "5 4" : "8 5"} strokeLinecap="round" opacity={0.85} />
       )}
 
-      {/* Stage 1: tiny sprout leaves */}
-      {stage >= 1 && (
-        <g>
-          <ellipse cx="68" cy={115 - stemHeight + 4} rx="5" ry="3" fill={leafColor} transform={`rotate(-30 68 ${115 - stemHeight + 4})`} />
-          <ellipse cx="82" cy={115 - stemHeight + 4} rx="5" ry="3" fill={leafColor} transform={`rotate(30 82 ${115 - stemHeight + 4})`} />
-        </g>
+      {/* Home pin */}
+      <circle cx={homeX} cy={homeY} r={11} fill={BRAND} />
+      <text x={homeX} y={homeY + 4} fontSize={11} textAnchor="middle">🏠</text>
+
+      {/* Safe zone label */}
+      {showZone && !compact && (
+        <text x={homeX - zoneR + 10} y={homeY - zoneR + 14} fontSize={8} fill="#15803d" fontWeight="600">Safe Zone</text>
       )}
 
-      {/* Stage 2: 2 larger leaves mid-stem */}
-      {stage >= 2 && (
-        <g>
-          <ellipse cx="60" cy="95" rx="10" ry="5" fill={leafColor} transform="rotate(-25 60 95)" />
-          <ellipse cx="90" cy="95" rx="10" ry="5" fill={leafDark} transform="rotate(25 90 95)" />
-        </g>
+      {/* Elder marker (not at home) */}
+      {mode !== "home" && (
+        <>
+          <circle cx={elderX} cy={elderY} r={16} fill={pathColor} fillOpacity={0.18} />
+          <circle cx={elderX} cy={elderY} r={8} fill={pathColor} />
+          <circle cx={elderX} cy={elderY} r={3.5} fill="#fff" />
+          {/* Label bubble */}
+          <rect x={elderX - 28} y={elderY - 28} width={56} height={16} rx={5} fill={pathColor} />
+          <text x={elderX} y={elderY - 17} fontSize={8} fill="#fff" textAnchor="middle" fontWeight="600">Elena · Now</text>
+        </>
       )}
 
-      {/* Stage 3: bush - more leaves */}
-      {stage >= 3 && (
-        <g>
-          <ellipse cx="55" cy="75" rx="12" ry="6" fill={leafColor} transform="rotate(-30 55 75)" />
-          <ellipse cx="95" cy="75" rx="12" ry="6" fill={leafDark} transform="rotate(30 95 75)" />
-          <ellipse cx="65" cy="60" rx="10" ry="5" fill={leafColor} transform="rotate(-15 65 60)" />
-          <ellipse cx="85" cy="60" rx="10" ry="5" fill={leafDark} transform="rotate(15 85 60)" />
-        </g>
-      )}
-
-      {/* Stage 4: flower in bloom */}
-      {stage >= 4 && (
-        <g>
-          {/* petals */}
-          <circle cx="75" cy="30" r="8" fill={flowerColor} />
-          <circle cx="65" cy="38" r="8" fill={flowerColor} />
-          <circle cx="85" cy="38" r="8" fill={flowerColor} />
-          <circle cx="70" cy="47" r="8" fill={flowerColor} />
-          <circle cx="80" cy="47" r="8" fill={flowerColor} />
-          <circle cx="75" cy="40" r="6" fill={flowerCenter} />
-        </g>
-      )}
-
-      {/* Wilting droop marks */}
-      {wilt && stage >= 2 && (
-        <g opacity="0.5">
-          <path d="M 70 90 Q 68 95 65 96" stroke={leafDark} strokeWidth="1" fill="none" />
-        </g>
+      {/* Wandering indicator */}
+      {mode === "unusual" && (
+        <>
+          <circle cx={elderX + 18} cy={elderY - 18} r={9} fill={RED} />
+          <text x={elderX + 18} y={elderY - 14} fontSize={10} textAnchor="middle">⚠️</text>
+        </>
       )}
     </svg>
   );
 }
 
-function StreakBadge({ streak = 0, size = 52 }) {
-  const active = streak > 0;
-  const flameColor = active ? "#ff7d29" : "#9ca3af";
-  const flameInner = active ? "#fbbf24" : "#d1d5db";
+/* ===================== RISK GAUGE ===================== */
+
+function RiskGauge({ score = 45, size = 160 }) {
+  const r = 58;
+  const cx = size / 2;
+  const cy = Math.round(size * 0.68);
+  const pct = Math.min(1, score / 100);
+  const totalArc = Math.PI;
+  const sweepAngle = totalArc * pct;
+  const ixEnd = cx + r * Math.cos(Math.PI - sweepAngle);
+  const iyEnd = cy - r * Math.sin(Math.PI - sweepAngle);
+  const largeArc = sweepAngle > Math.PI / 2 ? 1 : 0;
+  const color = score < 40 ? GREEN : score < 70 ? YELLOW : RED;
+
   return (
-    <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
-      <svg width={size} height={size} viewBox="0 0 52 52">
-        <path
-          d="M 26 6 C 30 14, 38 18, 38 30 C 38 40, 32 46, 26 46 C 20 46, 14 40, 14 30 C 14 24, 18 22, 20 18 C 22 22, 24 20, 26 6 Z"
-          fill={flameColor}
-        />
-        <path
-          d="M 26 18 C 28 22, 32 26, 32 32 C 32 38, 29 42, 26 42 C 23 42, 20 38, 20 32 C 20 28, 22 26, 24 24 C 25 26, 25.5 25, 26 18 Z"
-          fill={flameInner}
-        />
-      </svg>
+    <svg width={size} height={Math.round(size * 0.75)}>
+      <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`} fill="none" stroke={LINE} strokeWidth={14} strokeLinecap="round" />
+      {pct > 0.01 && (
+        <path d={`M ${cx - r} ${cy} A ${r} ${r} 0 ${largeArc} 1 ${ixEnd} ${iyEnd}`} fill="none" stroke={color} strokeWidth={14} strokeLinecap="round" />
+      )}
+      <text x={cx} y={cy - 8} textAnchor="middle" fontSize={30} fontWeight="bold" fill={color}>{score}</text>
+      <text x={cx} y={cy + 10} textAnchor="middle" fontSize={11} fill={SUB}>/ 100</text>
+    </svg>
+  );
+}
+
+/* ===================== BEHAVIOR BAR CHART ===================== */
+
+function BehaviorChart({ compact = false }) {
+  const H = compact ? 60 : 80;
+  const W = 310;
+  const bars = [
+    { label: "6", h: 0.15 },
+    { label: "8", h: 0.2 },
+    { label: "9", h: 0.85 },
+    { label: "10", h: 0.7 },
+    { label: "12", h: 0.3 },
+    { label: "14", h: 0.25 },
+    { label: "15", h: 0.9 },
+    { label: "16", h: 0.75 },
+    { label: "18", h: 0.4 },
+    { label: "20", h: 0.2 },
+    { label: "22", h: 0.1 },
+    { label: "2", h: 0.6, anomaly: true },
+  ];
+  const bw = W / bars.length - 4;
+  return (
+    <svg width={W} height={H + 18}>
+      {bars.map((b, i) => {
+        const bh = Math.max(4, b.h * H);
+        const x = i * (bw + 4);
+        const y = H - bh;
+        return (
+          <g key={i}>
+            <rect x={x} y={y} width={bw} height={bh} rx={3}
+              fill={b.anomaly ? RED : BRAND} opacity={b.anomaly ? 1 : 0.7} />
+            {!compact && (
+              <text x={x + bw / 2} y={H + 14} fontSize={8} textAnchor="middle" fill={SUB}>{b.label}</text>
+            )}
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/* ===================== BOTTOM TAB ===================== */
+
+function BottomTab({ active, onTab, t }) {
+  const tabs = [
+    { id: "home-cg", icon: <Home size={22} />, label: t.home },
+    { id: "map",     icon: <MapPin size={22} />, label: t.viewMap },
+    { id: "alerts",  icon: <Bell size={22} />,  label: t.alerts },
+    { id: "settings",icon: <SettingsIcon size={22} />, label: t.settings },
+  ];
+  return (
+    <div style={{ background: CARD, borderTop: `1px solid ${LINE}` }} className="flex items-center justify-around py-2">
+      {tabs.map((tab) => (
+        <button key={tab.id} onClick={() => onTab(tab.id)}
+          className="flex flex-col items-center gap-0.5 py-1 px-4"
+          style={{ color: active === tab.id ? BRAND : SUB }}>
+          {tab.icon}
+          <span className="text-xs font-medium">{tab.label}</span>
+        </button>
+      ))}
     </div>
   );
 }
+
+/* ===================== MAIN APP ===================== */
 
 export default function App() {
   const [screen, setScreen] = useState("register");
   const [lang, setLang] = useState("ru");
   const [fontSize, setFontSize] = useState("medium");
-  const [recording, setRecording] = useState(false);
-  const [paired, setPaired] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [toast, setToast] = useState("");
-  const [streak, setStreak] = useState(6);
-  const [redeemedCoupons, setRedeemedCoupons] = useState([]);
-
-  // controlled user profile
-  const [user, setUser] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    avatar: null,
-  });
-
-  // medications (stateful)
-  const [meds, setMeds] = useState(() => buildInitialMeds());
-
-  // upload refs
-  const avatarRef = useRef(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [aiToggle, setAiToggle] = useState(true);
+  const [fallToggle, setFallToggle] = useState(true);
+  const [user, setUser] = useState({ firstName: "", lastName: "", email: "", password: "", avatar: null });
 
   const t = T[lang];
   const fontPx = { small: 14, medium: 16, large: 18 }[fontSize];
-  const userFirstName = user.firstName.trim();
-  const userLastName = user.lastName.trim();
-  const userEmail = user.email.trim();
-  const userPassword = user.password.trim();
-  const profileName = [userFirstName, userLastName].filter(Boolean).join(" ");
-  const isRegistrationValid = Boolean(userFirstName && userEmail && userPassword);
-
-  const takenTotal = meds.reduce((s, m) => s + m.taken, 0);
-  const allTotal = meds.reduce((s, m) => s + m.total, 0);
-  const dosesLeft = Math.max(0, allTotal - takenTotal);
-  const adherence = allTotal > 0 ? takenTotal / allTotal : 0;
-  const reachedFullToday = allTotal > 0 && takenTotal === allTotal;
-  const effectiveStreak = reachedFullToday ? streak + 1 : streak;
-  const coupon7Unlocked = effectiveStreak >= 7;
-  const coupon14Unlocked = effectiveStreak >= 14;
-  const daysToNextCoupon = coupon14Unlocked ? 0 : coupon7Unlocked ? (14 - effectiveStreak) : (7 - effectiveStreak);
-  const unlockedCoupons = [
-    coupon7Unlocked && { id: "c7", title: t.discount10, desc: t.discount10Desc, days: 7, code: "MED7-10OFF", color: "#ff7d29", redeemed: redeemedCoupons.includes("c7") },
-    coupon14Unlocked && { id: "c14", title: t.discount25, desc: t.discount25Desc, days: 14, code: "MED14-25OFF", color: "#8b5cf6", redeemed: redeemedCoupons.includes("c14") },
-  ].filter(Boolean);
-  const availableCouponCount = unlockedCoupons.filter((c) => !c.redeemed).length;
-
-  const initials =
-    (user.firstName?.[0] || "").toUpperCase() +
-    (user.lastName?.[0] || "").toUpperCase();
 
   const showToast = (text) => {
     setToast(text);
-    setTimeout(() => setToast(""), 1600);
+    setTimeout(() => setToast(""), 1800);
   };
 
   const resetDemo = () => {
     setUser({ firstName: "", lastName: "", email: "", password: "", avatar: null });
-    setMeds(buildInitialMeds());
-    setPaired(false);
-    setShowPassword(false);
-    setToast("");
     setScreen("register");
+    setToast("");
   };
 
-  const handleAvatarUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setUser((u) => ({ ...u, avatar: ev.target.result }));
-    reader.readAsDataURL(file);
-    e.target.value = "";
-  };
+  const go = (s) => setScreen(s);
 
-  const saveProfile = () => {
-    if (!isRegistrationValid) return;
-    setUser((prev) => ({
-      ...prev,
-      firstName: prev.firstName.trim(),
-      lastName: prev.lastName.trim(),
-      email: prev.email.trim(),
-      password: prev.password.trim(),
-    }));
-    setScreen("role");
-  };
-
-  const takeDose = (id) => {
-    let toastText = "";
-    setMeds((prev) =>
-      prev.map((m) => {
-        if (m.id !== id || m.taken >= m.total) return m;
-        toastText = `${m.name}: +1 ${t.taken.toLowerCase()}`;
-        return { ...m, taken: m.taken + 1 };
-      })
-    );
-    if (toastText) showToast(toastText);
-  };
-
-  const removeMed = (id) => {
-    setMeds((prev) => prev.filter((m) => m.id !== id));
-  };
-
-  const addMedication = (med) => {
-    setMeds((prev) => {
-      const id = Math.max(0, ...prev.map((m) => m.id || 0)) + 1;
-      const color = PALETTE[(id - 1) % PALETTE.length];
-      const nextMed = buildMedication({ id, taken: 0, ...med, color }, color);
-      return [...prev, nextMed].sort((a, b) => a.time.localeCompare(b.time) || a.name.localeCompare(b.name));
-    });
-  };
-
-  const screens = [
-    { id: "register",      label: lang === "ru" ? "\u0420\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044f" : "Register" },
-    { id: "role",          label: lang === "ru" ? "\u0412\u044b\u0431\u043e\u0440 \u0440\u043e\u043b\u0438" : "Choose role" },
-    { id: "elderType",     label: lang === "ru" ? "\u0422\u0438\u043f \u043f\u043e\u0436\u0438\u043b\u043e\u0433\u043e" : "Elder type" },
-    { id: "elder",         label: lang === "ru" ? "\u0413\u043b\u0430\u0432\u043d\u044b\u0439 \u2014 \u041f\u043e\u0436\u0438\u043b\u043e\u0439" : "Elder home" },
-    { id: "addMed",        label: lang === "ru" ? "\u0414\u043e\u0431\u0430\u0432\u0438\u0442\u044c \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u043e" : "Add medication" },
-    { id: "scan",          label: lang === "ru" ? "\u0421\u043a\u0430\u043d \u0440\u0435\u0446\u0435\u043f\u0442\u0430" : "Scan prescription" },
-    { id: "settingsElder", label: lang === "ru" ? "\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u2014 \u041f\u043e\u0436\u0438\u043b\u043e\u0439" : "Elder settings" },
-    { id: "caregiver",     label: lang === "ru" ? "\u0413\u043b\u0430\u0432\u043d\u044b\u0439 \u2014 \u041f\u043e\u043c\u043e\u0449\u043d\u0438\u043a" : "Caregiver home" },
-    { id: "settingsCare",  label: lang === "ru" ? "\u041d\u0430\u0441\u0442\u0440\u043e\u0439\u043a\u0438 \u2014 \u041f\u043e\u043c\u043e\u0449\u043d\u0438\u043a" : "Caregiver settings" },
-    { id: "pairScan",      label: lang === "ru" ? "\u0421\u043a\u0430\u043d\u0438\u0440\u043e\u0432\u0430\u043d\u0438\u0435 QR" : "Scan elder's QR" },
-    { id: "rewards",       label: lang === "ru" ? "\u041d\u0430\u0433\u0440\u0430\u0434\u044b" : "Rewards" },
+  const screenList = [
+    { id: "register",    label: lang === "ru" ? "Регистрация" : "Register" },
+    { id: "role",        label: lang === "ru" ? "Выбор роли" : "Choose role" },
+    { id: "home-cg",     label: lang === "ru" ? "Главная (Помощник)" : "Caretaker home" },
+    { id: "map",         label: lang === "ru" ? "Карта" : "Map" },
+    { id: "zone-setup",  label: lang === "ru" ? "Зоны безопасности" : "Safe zones" },
+    { id: "alerts",      label: lang === "ru" ? "Оповещения" : "Alerts" },
+    { id: "new-zone",    label: lang === "ru" ? "Новая зона" : "New zone alert" },
+    { id: "unusual",     label: lang === "ru" ? "Режим тревоги" : "Unusual behavior" },
+    { id: "ai-call",     label: lang === "ru" ? "ИИ-звонок" : "AI Call" },
+    { id: "behavior-ml", label: lang === "ru" ? "Анализ поведения" : "Behavior ML" },
+    { id: "fall-detect", label: lang === "ru" ? "Падение" : "Fall detection" },
+    { id: "home-elder",  label: lang === "ru" ? "Главная (Пожилой)" : "Elder home" },
+    { id: "settings",    label: lang === "ru" ? "Настройки" : "Settings" },
+    { id: "risk-score",  label: lang === "ru" ? "Риск-скор" : "Risk score" },
+    { id: "low-power",   label: lang === "ru" ? "Режим экономии" : "Low power" },
   ];
 
-  /* =========================================================
-                        SCREENS
-  ========================================================= */
+  /* ============================= SCREENS ============================= */
 
   const Register = () => (
     <div className="px-6 pt-16 pb-8">
-      <div className="flex flex-col items-center mb-5">
+      <div className="flex flex-col items-center mb-7">
         <div style={{ background: BRAND }} className="w-16 h-16 rounded-3xl flex items-center justify-center mb-3 shadow-lg">
-          <Pill color="#fff" size={32} />
+          <Shield color="#fff" size={32} />
         </div>
-        <div style={{ color: TEXT }} className="text-2xl font-bold">MedRemind</div>
-        <div style={{ color: SUB }} className="text-sm mt-1">{t.tagline}</div>
+        <div style={{ color: TEXT }} className="text-2xl font-bold">{t.appName}</div>
+        <div style={{ color: SUB }} className="text-sm mt-1 text-center px-4">{t.tagline}</div>
       </div>
 
-      <div className="flex flex-col items-center mb-5">
-        <input
-          ref={avatarRef}
-          type="file"
-          accept="image/*"
-          onChange={handleAvatarUpload}
-          style={{ display: "none" }}
-        />
-        <button
-          onClick={() => avatarRef.current?.click()}
-          className="relative"
-          type="button"
-        >
-          <div
-            style={{
-              background: user.avatar ? "transparent" : "#e5e7eb",
-              backgroundImage: user.avatar ? `url(${user.avatar})` : "none",
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-            className="w-24 h-24 rounded-full flex items-center justify-center overflow-hidden border"
-          >
-            {!user.avatar && <User size={42} color="#9ca3af" />}
-          </div>
-          <div
-            style={{ background: BRAND }}
-            className="absolute bottom-0 right-0 w-9 h-9 rounded-full flex items-center justify-center border-2 border-white shadow"
-          >
-            <Camera size={16} color="#fff" />
-          </div>
-        </button>
-        <div style={{ color: SUB }} className="text-xs mt-2">
-          {user.avatar ? t.tapIcon : t.uploadPhoto}
+      <div className="space-y-3 mb-6">
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={t.first} placeholder="Алекс" value={user.firstName} onChange={(v) => setUser((u) => ({ ...u, firstName: v }))} />
+          <Field label={t.last}  placeholder="Иванов" value={user.lastName}  onChange={(v) => setUser((u) => ({ ...u, lastName: v }))} />
         </div>
-      </div>
-
-      <div className="space-y-3">
-        <div className="grid grid-cols-2 gap-2">
-          <Field
-            placeholder={t.first}
-            value={user.firstName}
-            onChange={(v) => setUser((u) => ({ ...u, firstName: v }))}
-          />
-          <Field
-            placeholder={t.last}
-            value={user.lastName}
-            onChange={(v) => setUser((u) => ({ ...u, lastName: v }))}
-          />
-        </div>
-        <Field
-          placeholder={t.email}
-          type="email"
-          value={user.email}
-          onChange={(v) => setUser((u) => ({ ...u, email: v }))}
-        />
-        <Field
-          placeholder={t.password}
-          type={showPassword ? "text" : "password"}
-          value={user.password}
-          onChange={(v) => setUser((u) => ({ ...u, password: v }))}
+        <Field label={t.email}    placeholder="alex@example.com" type="email"    value={user.email}    onChange={(v) => setUser((u) => ({ ...u, email: v }))} />
+        <Field label={t.password} placeholder="••••••••"          type={showPassword ? "text" : "password"} value={user.password} onChange={(v) => setUser((u) => ({ ...u, password: v }))}
           right={showPassword ? <EyeOff size={18} color={SUB} /> : <Eye size={18} color={SUB} />}
-          onRightClick={() => setShowPassword((s) => !s)}
-        />
+          onRightClick={() => setShowPassword((p) => !p)} />
       </div>
 
-      <div className="mt-6">
-        <PrimaryButton
-          onClick={saveProfile}
-          disabled={!isRegistrationValid}
-        >
-          {t.continue}
-        </PrimaryButton>
-      </div>
+      <PrimaryButton onClick={() => go("role")} disabled={!user.firstName || !user.email || !user.password}>
+        {t.continue}
+      </PrimaryButton>
 
-      <div style={{ color: SUB }} className="text-center text-xs mt-4">
-        {lang === "ru" ? "\u0423\u0436\u0435 \u0435\u0441\u0442\u044c \u0430\u043a\u043a\u0430\u0443\u043d\u0442?" : "Already have an account?"}{" "}
-        <span style={{ color: BRAND, fontWeight: 600 }}>
-          {lang === "ru" ? "\u0412\u043e\u0439\u0442\u0438" : "Log in"}
-        </span>
+      <div className="mt-8 flex items-center gap-3">
+        {[
+          { icon: <MapPin size={16} color={BRAND} />, text: lang === "ru" ? "GPS мониторинг" : "GPS monitoring" },
+          { icon: <Brain size={16} color={PURPLE} />, text: lang === "ru" ? "ИИ анализ" : "AI analysis" },
+          { icon: <Shield size={16} color={GREEN} />, text: lang === "ru" ? "24/7 защита" : "24/7 safety" },
+        ].map((f, i) => (
+          <div key={i} style={{ background: CARD }} className="flex-1 rounded-2xl p-3 border flex flex-col items-center gap-1.5">
+            {f.icon}
+            <span style={{ color: TEXT }} className="text-xs font-semibold text-center leading-tight">{f.text}</span>
+          </div>
+        ))}
       </div>
     </div>
   );
 
   const Role = () => (
-    <>
-      <TopBar title={t.chooseRole} onBack={() => setScreen("register")} />
-      <div className="px-6 pt-4">
-        <div style={{ color: SUB }} className="text-sm text-center mb-6">
-          {lang === "ru"
-            ? "\u0412\u044b\u0431\u0435\u0440\u0438\u0442\u0435 \u0432\u0430\u0448 \u043f\u0440\u043e\u0444\u0438\u043b\u044c, \u0447\u0442\u043e\u0431\u044b \u043c\u044b \u043d\u0430\u0441\u0442\u0440\u043e\u0438\u043b\u0438 \u043f\u0440\u0438\u043b\u043e\u0436\u0435\u043d\u0438\u0435 \u043f\u043e\u0434 \u0432\u0430\u0441"
-            : "Pick your profile so we can tailor the app for you"}
-        </div>
-        <div className="space-y-3">
+    <div className="px-6 pt-14 pb-8">
+      <TopBar title={t.chooseRole} onBack={() => go("register")} />
+      <div className="space-y-4 mt-4">
+        {[
+          {
+            id: "home-cg", icon: <UserPlus size={32} color={BRAND} />,
+            title: t.caregiver, desc: t.caregiverDesc,
+            features: lang === "ru"
+              ? ["GPS-трекинг", "Зоны безопасности", "ИИ-звонки", "Риск-скор"]
+              : ["GPS tracking", "Safe zones", "AI calls", "Risk score"],
+          },
+          {
+            id: "home-elder", icon: <User size={32} color={PURPLE} />,
+            title: t.elder, desc: t.elderDesc,
+            features: lang === "ru"
+              ? ["Простой экран", "Кнопка SOS", "ИИ-звонки", "Статус"]
+              : ["Simple screen", "SOS button", "AI calls", "Status"],
+          },
+        ].map((role) => (
           <button
-            onClick={() => setScreen("elderType")}
+            key={role.id}
+            onClick={() => go(role.id)}
             style={{ background: CARD }}
-            className="w-full rounded-3xl p-5 text-left border flex items-center gap-4"
+            className="w-full rounded-3xl p-5 border text-left"
           >
-            <div style={{ background: BRAND_SOFT, color: BRAND }} className="w-14 h-14 rounded-2xl flex items-center justify-center">
-              <Heart size={28} />
+            <div className="flex items-center gap-4 mb-3">
+              <div style={{ background: BRAND_SOFT }} className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0">
+                {role.icon}
+              </div>
+              <div>
+                <div style={{ color: TEXT }} className="text-lg font-bold">{role.title}</div>
+                <div style={{ color: SUB }} className="text-sm">{role.desc}</div>
+              </div>
             </div>
-            <div className="flex-1">
-              <div style={{ color: TEXT }} className="font-semibold text-lg">{t.elder}</div>
-              <div style={{ color: SUB }} className="text-sm">{t.elderDesc}</div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {role.features.map((f, i) => (
+                <div key={i} className="flex items-center gap-1.5">
+                  <div style={{ background: GREEN }} className="w-4 h-4 rounded-full flex items-center justify-center shrink-0">
+                    <Check size={10} color="#fff" />
+                  </div>
+                  <span style={{ color: SUB }} className="text-xs">{f}</span>
+                </div>
+              ))}
             </div>
-            <ChevronRight size={22} color={SUB} />
           </button>
+        ))}
+      </div>
+    </div>
+  );
 
-          <button
-            onClick={() => setScreen("caregiver")}
-            style={{ background: CARD }}
-            className="w-full rounded-3xl p-5 text-left border flex items-center gap-4"
-          >
-            <div style={{ background: "#e0f2fe", color: "#0284c7" }} className="w-14 h-14 rounded-2xl flex items-center justify-center">
-              <Users size={28} />
-            </div>
-            <div className="flex-1">
-              <div style={{ color: TEXT }} className="font-semibold text-lg">{t.caregiver}</div>
-              <div style={{ color: SUB }} className="text-sm">{t.caregiverDesc}</div>
-            </div>
-            <ChevronRight size={22} color={SUB} />
+  const CaregiverHome = () => (
+    <div className="flex flex-col h-full" style={{ background: BG }}>
+      <div className="px-5 pt-14 pb-3">
+        <div className="flex items-center justify-between mb-1">
+          <div>
+            <div style={{ color: SUB }} className="text-xs">{lang === "ru" ? "Воскресенье, 19 апреля" : "Sunday, April 19"}</div>
+            <div style={{ color: TEXT }} className="text-xl font-bold">{lang === "ru" ? "Привет, Алекс 👋" : "Hey, Alex 👋"}</div>
+          </div>
+          <button onClick={() => go("settings")} style={{ background: CARD }} className="w-10 h-10 rounded-full border flex items-center justify-center">
+            <SettingsIcon size={18} color={SUB} />
           </button>
         </div>
       </div>
-    </>
+
+      {/* Elder status card */}
+      <div className="px-5 mb-3">
+        <button onClick={() => go("map")} style={{ background: CARD }} className="w-full rounded-3xl p-4 border shadow-sm text-left">
+          <div className="flex items-center gap-3 mb-3">
+            <div style={{ background: BRAND_SOFT, width: 52, height: 52 }} className="rounded-2xl flex items-center justify-center shrink-0">
+              <User size={26} color={BRAND} />
+            </div>
+            <div className="flex-1">
+              <div style={{ color: TEXT }} className="font-bold text-base">{t.elderName}</div>
+              <div style={{ color: SUB }} className="text-xs">+7 921 555-1234</div>
+            </div>
+            <StatusBadge mode="outdoor" t={t} />
+          </div>
+
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { icon: <Clock size={14} />, label: t.lastSeen, val: `2 ${t.minAgo}` },
+              { icon: <Signal size={14} />, label: t.gpsUpdate, val: t.everyMin },
+              { icon: <Battery size={14} />, label: t.battery, val: "62%" },
+            ].map((s, i) => (
+              <div key={i} style={{ background: BG }} className="rounded-xl p-2 text-center">
+                <div style={{ color: BRAND }} className="flex justify-center mb-0.5">{s.icon}</div>
+                <div style={{ color: SUB }} className="text-xs">{s.label}</div>
+                <div style={{ color: TEXT }} className="text-sm font-bold">{s.val}</div>
+              </div>
+            ))}
+          </div>
+        </button>
+      </div>
+
+      <ModeBanner mode="outdoor" t={t} />
+
+      {/* Risk Score */}
+      <div className="px-5 mb-3">
+        <button onClick={() => go("risk-score")} style={{ background: CARD }} className="w-full rounded-3xl p-4 border shadow-sm flex items-center gap-4 text-left">
+          <RiskGauge score={45} size={120} />
+          <div className="flex-1">
+            <div style={{ color: TEXT }} className="font-bold text-base mb-1">{t.riskScore}</div>
+            <div style={{ background: "#fef9c3", color: YELLOW }} className="text-xs font-semibold px-2.5 py-1 rounded-full inline-flex items-center gap-1 mb-2">
+              <AlertTriangle size={11} /> {t.medRisk}
+            </div>
+            <div style={{ color: SUB }} className="text-xs leading-relaxed">
+              {lang === "ru" ? "Нет привычного маршрута +30, идёт долго +15" : "No usual route +30, walking long +15"}
+            </div>
+            <div style={{ color: BRAND }} className="text-xs font-semibold mt-1">{lang === "ru" ? "Подробнее →" : "Details →"}</div>
+          </div>
+        </button>
+      </div>
+
+      {/* Quick actions */}
+      <div className="px-5 grid grid-cols-3 gap-2 mb-3">
+        {[
+          { id: "map",         icon: <MapPin size={20} color={BRAND} />,   label: t.viewMap },
+          { id: "zone-setup",  icon: <Layers size={20} color={BLUE} />,    label: t.setZones },
+          { id: "behavior-ml", icon: <Brain size={20} color={PURPLE} />,   label: t.aiInsights },
+        ].map((a) => (
+          <button key={a.id} onClick={() => go(a.id)} style={{ background: CARD }} className="rounded-2xl border py-3 flex flex-col items-center gap-1">
+            <div style={{ background: BRAND_SOFT }} className="w-10 h-10 rounded-xl flex items-center justify-center">{a.icon}</div>
+            <span style={{ color: TEXT }} className="text-xs font-semibold">{a.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Recent alerts */}
+      <div className="px-5 mb-2">
+        <div style={{ color: TEXT }} className="font-bold text-sm mb-2">{t.alertHistory}</div>
+        {[
+          { color: YELLOW, icon: <Navigation size={13} />, text: lang === "ru" ? "Елена вышла из дома" : "Elena left home", time: "14:30" },
+          { color: BRAND,  icon: <Brain size={13} />,      text: lang === "ru" ? "Посетила новое место" : "Visited new place", time: "15:10" },
+        ].map((al, i) => (
+          <button key={i} onClick={() => go(i === 1 ? "new-zone" : "alerts")} style={{ background: CARD }} className="w-full rounded-2xl px-4 py-3 border mb-2 flex items-center gap-3 text-left">
+            <div style={{ background: al.color + "22", color: al.color }} className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0">{al.icon}</div>
+            <div className="flex-1 min-w-0">
+              <div style={{ color: TEXT }} className="text-sm font-semibold truncate">{al.text}</div>
+            </div>
+            <div style={{ color: SUB }} className="text-xs shrink-0">{al.time}</div>
+          </button>
+        ))}
+      </div>
+
+      <div className="flex-1" />
+      <BottomTab active="home-cg" onTab={go} t={t} />
+    </div>
   );
 
-  const ElderType = () => (
-    <>
-      <TopBar title={t.elderType} onBack={() => setScreen("role")} />
-      <div className="px-6 pt-4">
-        <div className="space-y-3">
-          <button
-            onClick={() => setScreen("elder")}
-            style={{ background: CARD }}
-            className="w-full rounded-3xl p-5 text-left border flex items-center gap-4"
-          >
-            <div style={{ background: BRAND_SOFT, color: BRAND }} className="w-14 h-14 rounded-2xl flex items-center justify-center">
-              <User size={28} />
-            </div>
-            <div className="flex-1">
-              <div style={{ color: TEXT }} className="font-semibold text-lg">{t.solo}</div>
-              <div style={{ color: SUB }} className="text-sm">{t.soloDesc}</div>
-            </div>
-            <ChevronRight size={22} color={SUB} />
-          </button>
+  const MapView = () => (
+    <div className="flex flex-col h-full" style={{ background: BG }}>
+      <TopBar title={t.viewMap} onBack={() => go("home-cg")}
+        right={<button onClick={() => go("zone-setup")} style={{ background: CARD }} className="w-10 h-10 rounded-full border flex items-center justify-center"><Layers size={18} color={BRAND} /></button>} />
 
-          <button
-            onClick={() => setScreen("elder")}
-            style={{ background: CARD }}
-            className="w-full rounded-3xl p-5 text-left border flex items-center gap-4"
-          >
-            <div style={{ background: "#dcfce7", color: GREEN }} className="w-14 h-14 rounded-2xl flex items-center justify-center">
-              <UserPlus size={28} />
+      {/* Full map */}
+      <div className="mx-4 rounded-3xl overflow-hidden border shadow-sm mb-3">
+        <FakeMap mode="outdoor" showPath showZone />
+      </div>
+
+      <ModeBanner mode="outdoor" t={t} />
+
+      {/* Info card */}
+      <div className="px-5">
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div style={{ background: BLUE + "22", color: BLUE }} className="w-8 h-8 rounded-xl flex items-center justify-center">
+                <Navigation size={16} />
+              </div>
+              <div>
+                <div style={{ color: TEXT }} className="font-bold text-sm">{t.elderName}</div>
+                <div style={{ color: SUB }} className="text-xs">{lang === "ru" ? "Ул. Ленина, 300 м от дома" : "Lenin St, 300 m from home"}</div>
+              </div>
             </div>
-            <div className="flex-1">
-              <div style={{ color: TEXT }} className="font-semibold text-lg">{t.withCare}</div>
-              <div style={{ color: SUB }} className="text-sm">{t.withCareDesc}</div>
+            <StatusBadge mode="outdoor" t={t} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 mb-3">
+            <div style={{ background: BG }} className="rounded-xl p-3">
+              <div style={{ color: SUB }} className="text-xs mb-0.5">{t.walkDuration}</div>
+              <div style={{ color: TEXT }} className="font-bold">42 {t.min}</div>
             </div>
-            <ChevronRight size={22} color={SUB} />
-          </button>
+            <div style={{ background: BG }} className="rounded-xl p-3">
+              <div style={{ color: SUB }} className="text-xs mb-0.5">{t.gpsUpdate}</div>
+              <div style={{ color: TEXT }} className="font-bold">{t.everyMin}</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <button onClick={() => go("unusual")} style={{ background: RED + "18", color: RED }} className="rounded-xl py-2.5 text-sm font-bold flex items-center justify-center gap-1.5">
+              <AlertTriangle size={14} /> {lang === "ru" ? "Тревога" : "Alert"}
+            </button>
+            <button onClick={() => go("zone-setup")} style={{ background: BRAND_SOFT, color: BRAND }} className="rounded-xl py-2.5 text-sm font-bold flex items-center justify-center gap-1.5">
+              <Plus size={14} /> {t.addSafeZoneBtn}
+            </button>
+          </div>
         </div>
       </div>
-    </>
+
+      <div className="flex-1" />
+      <BottomTab active="map" onTab={go} t={t} />
+    </div>
   );
 
-  const Avatar = ({ size = 44 }) => (
-    <div
-      style={{
-        width: size, height: size,
-        background: user.avatar ? "transparent" : BRAND,
-        backgroundImage: user.avatar ? `url(${user.avatar})` : "none",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        color: "#fff",
-        fontWeight: 700,
-      }}
-      className="rounded-full flex items-center justify-center text-lg overflow-hidden border"
-    >
-      {!user.avatar && (initials || "\u0410")}
+  const ZoneSetup = () => (
+    <div style={{ background: BG }}>
+      <TopBar title={t.safeZone} onBack={() => go("map")} />
+
+      <div className="mx-4 rounded-3xl overflow-hidden border shadow-sm mb-4">
+        <FakeMap mode="home" showPath={false} showZone />
+      </div>
+
+      <div className="px-5 space-y-3 pb-8">
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: SUB }} className="text-xs font-medium mb-1">{t.homeLocation}</div>
+          <div className="flex items-center gap-3">
+            <div style={{ background: BRAND_SOFT, color: BRAND }} className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0">
+              <Home size={18} />
+            </div>
+            <div style={{ color: TEXT }} className="font-semibold flex-1">{t.homeAddress}</div>
+            <ChevronRight size={18} color={SUB} />
+          </div>
+        </div>
+
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: SUB }} className="text-xs font-medium mb-3">{t.zoneRadius}</div>
+          <div className="flex items-center justify-between mb-2">
+            <div style={{ color: TEXT }} className="font-bold text-lg">{t.radiusLabel}</div>
+            <div style={{ color: BRAND }} className="text-sm font-semibold">{lang === "ru" ? "Изменить" : "Edit"}</div>
+          </div>
+          <div style={{ background: LINE }} className="w-full h-2 rounded-full relative">
+            <div style={{ background: BRAND, width: "55%" }} className="h-2 rounded-full" />
+            <div style={{ background: BRAND, left: "55%", top: "50%", transform: "translate(-50%, -50%)" }} className="absolute w-5 h-5 rounded-full border-2 border-white shadow" />
+          </div>
+          <div className="flex justify-between mt-1">
+            <span style={{ color: SUB }} className="text-xs">100 м</span>
+            <span style={{ color: SUB }} className="text-xs">1000 м</span>
+          </div>
+        </div>
+
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div className="flex items-center gap-2 mb-3">
+            <Moon size={16} color={PURPLE} />
+            <div style={{ color: TEXT }} className="font-semibold">{t.curfewHours}</div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {[{ label: lang === "ru" ? "С" : "From", val: t.curfewFrom }, { label: lang === "ru" ? "До" : "To", val: t.curfewTo }].map((c, i) => (
+              <div key={i} style={{ background: BG }} className="rounded-2xl p-3 text-center">
+                <div style={{ color: SUB }} className="text-xs mb-1">{c.label}</div>
+                <div style={{ color: TEXT }} className="font-bold text-lg">{c.val}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <PrimaryButton onClick={() => { showToast(t.zoneAdded); go("home-cg"); }}>
+          {lang === "ru" ? "Сохранить" : "Save"}
+        </PrimaryButton>
+      </div>
+    </div>
+  );
+
+  const AlertsList = () => {
+    const alertItems = [
+      { color: RED,    icon: <AlertTriangle size={14} />, title: lang === "ru" ? "Необычное поведение" : "Unusual behavior",    sub: lang === "ru" ? "Елена ходит кругами · Парк Горького" : "Elena walking in circles · Gorky Park", time: "02:10", id: "unusual" },
+      { color: YELLOW, icon: <Moon size={14} />,          title: lang === "ru" ? "Ночная прогулка" : "Night walk",             sub: lang === "ru" ? "Елена вышла в 01:15" : "Elena left at 1:15 AM",                            time: "01:15", id: "unusual" },
+      { color: BLUE,   icon: <Navigation size={14} />,    title: lang === "ru" ? "Покинула дом" : "Left home",                 sub: lang === "ru" ? "Обычная прогулка · GPS каждые 2 мин" : "Normal walk · GPS every 2 min",        time: "14:30", id: "map" },
+      { color: BRAND,  icon: <Brain size={14} />,         title: lang === "ru" ? "Новое место" : "New place",                  sub: lang === "ru" ? "Парк Горького · Добавить в зону?" : "Gorky Park · Add to safe zone?",          time: "15:10", id: "new-zone" },
+      { color: GREEN,  icon: <Home size={14} />,          title: lang === "ru" ? "Вернулась домой" : "Returned home",          sub: lang === "ru" ? "Прогулка 42 мин" : "Walk 42 min",                                            time: "16:45", id: "home-cg" },
+      { color: SUB,    icon: <Battery size={14} />,       title: lang === "ru" ? "Низкий заряд" : "Low battery",              sub: lang === "ru" ? "20% · Включён режим экономии" : "20% · Low power mode on",                   time: "18:02", id: "low-power" },
+    ];
+    return (
+      <div className="flex flex-col h-full" style={{ background: BG }}>
+        <TopBar title={t.alertHistory} onBack={() => go("home-cg")} />
+        <div className="px-5 pb-6 space-y-2 flex-1">
+          {alertItems.map((al, i) => (
+            <button key={i} onClick={() => go(al.id)} style={{ background: CARD }} className="w-full rounded-2xl px-4 py-3.5 border flex items-center gap-3 text-left">
+              <div style={{ background: al.color + "20", color: al.color }} className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0">{al.icon}</div>
+              <div className="flex-1 min-w-0">
+                <div style={{ color: TEXT }} className="text-sm font-semibold truncate">{al.title}</div>
+                <div style={{ color: SUB }} className="text-xs truncate mt-0.5">{al.sub}</div>
+              </div>
+              <div className="flex flex-col items-end shrink-0">
+                <div style={{ color: SUB }} className="text-xs">{al.time}</div>
+                <ChevronRight size={14} color={SUB} />
+              </div>
+            </button>
+          ))}
+        </div>
+        <BottomTab active="alerts" onTab={go} t={t} />
+      </div>
+    );
+  };
+
+  const NewZoneAlert = () => (
+    <div style={{ background: BG }}>
+      <TopBar title={t.newZoneTitle} onBack={() => go("alerts")} />
+
+      {/* Map snippet */}
+      <div className="mx-4 rounded-3xl overflow-hidden border shadow-sm mb-4">
+        <FakeMap mode="outdoor" showPath showZone={false} compact />
+      </div>
+
+      <div className="px-5 space-y-3 pb-8">
+        {/* Info card */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border shadow-sm">
+          <div className="flex items-center gap-3 mb-3">
+            <div style={{ background: BRAND_SOFT, color: BRAND }} className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0">
+              <MapPin size={20} />
+            </div>
+            <div>
+              <div style={{ color: TEXT }} className="font-bold">{lang === "ru" ? "Парк Горького" : "Gorky Park"}</div>
+              <div style={{ color: SUB }} className="text-xs">{t.newZoneDesc}</div>
+            </div>
+          </div>
+          <div style={{ background: BRAND_SOFT }} className="rounded-2xl px-3 py-2.5">
+            <div style={{ color: BRAND }} className="text-xs font-semibold">
+              {lang === "ru" ? "Елена посещает это место регулярно — 3 раза за последние 2 недели." : "Elena visits this place regularly — 3 times in the last 2 weeks."}
+            </div>
+          </div>
+        </div>
+
+        {/* Add to safe zone? */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: TEXT }} className="font-bold text-base mb-1">{t.addToSafeZone}</div>
+          <div style={{ color: SUB }} className="text-sm mb-4">
+            {lang === "ru"
+              ? "Если добавить — GPS в этой зоне будет обновляться реже, а тревоги не будет."
+              : "If added — GPS in this zone will update less often and no alert will trigger."}
+          </div>
+          <div className="space-y-2">
+            <PrimaryButton icon={<Check size={18} />} onClick={() => { showToast(t.zoneAdded); go("home-cg"); }}>{t.yes}</PrimaryButton>
+            <GhostButton onClick={() => go("alerts")}>{t.no}</GhostButton>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const UnusualBehavior = () => (
+    <div style={{ background: BG }}>
+      {/* Red alert header */}
+      <div style={{ background: RED }} className="px-5 pt-14 pb-5">
+        <div className="flex items-center gap-3 mb-1">
+          <div style={{ background: "rgba(255,255,255,.2)" }} className="w-10 h-10 rounded-full flex items-center justify-center">
+            <AlertTriangle size={22} color="#fff" />
+          </div>
+          <div>
+            <div className="text-white font-bold text-lg">{t.unusualBehavior}</div>
+            <div className="text-white opacity-80 text-sm">{t.activeAlert}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Map */}
+      <div className="mx-4 -mt-2 rounded-3xl overflow-hidden border shadow-lg mb-4">
+        <FakeMap mode="unusual" showPath showZone />
+      </div>
+
+      <div className="px-5 space-y-3 pb-6">
+        {/* Risk score */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border shadow-sm flex items-center gap-4">
+          <RiskGauge score={85} size={120} />
+          <div className="flex-1">
+            <div style={{ color: TEXT }} className="font-bold mb-1">{t.riskScore}</div>
+            <div style={{ background: "#fee2e2", color: RED }} className="text-xs font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1 mb-2">
+              <AlertTriangle size={10} /> {t.highRisk}
+            </div>
+            <div style={{ color: SUB }} className="text-xs">
+              {lang === "ru" ? "Ночная прогулка, ходьба по кругу, выход за зону" : "Night walk, circling, out of safe zone"}
+            </div>
+          </div>
+        </div>
+
+        {/* Risk breakdown */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: TEXT }} className="font-bold text-sm mb-3">{lang === "ru" ? "Состав риска" : "Risk breakdown"}</div>
+          {[
+            { label: t.nightWalk,     points: 20, color: PURPLE },
+            { label: t.walkingCircles,points: 25, color: RED },
+            { label: t.noUsualRoute,  points: 30, color: BRAND },
+            { label: t.longAbsence,   points: 10, color: YELLOW },
+          ].map((r, i) => (
+            <div key={i} className="flex items-center justify-between mb-2">
+              <div style={{ color: TEXT }} className="text-sm">{r.label}</div>
+              <div style={{ background: r.color + "20", color: r.color }} className="text-xs font-bold px-2.5 py-1 rounded-full">+{r.points}</div>
+            </div>
+          ))}
+          <div style={{ borderTop: `1px solid ${LINE}` }} className="flex items-center justify-between pt-2 mt-1">
+            <div style={{ color: TEXT }} className="font-bold text-sm">{lang === "ru" ? "Итого" : "Total"}</div>
+            <div style={{ color: RED }} className="font-bold text-lg">85 / 100</div>
+          </div>
+          <div style={{ color: SUB }} className="text-xs mt-1">{t.riskExplain}</div>
+        </div>
+
+        {/* Location + time */}
+        <div style={{ background: RED + "10", color: RED }} className="rounded-2xl px-4 py-3 flex items-center gap-2 text-sm font-semibold">
+          <MapPin size={15} /> {lang === "ru" ? "Парк Горького · тревога 18 мин" : "Gorky Park · alert 18 min"}
+        </div>
+
+        {/* Actions */}
+        <div className="grid grid-cols-2 gap-2">
+          <PrimaryButton onClick={() => go("ai-call")} icon={<Brain size={18} />} style={{ fontSize: 14 }}>{t.aiCall}</PrimaryButton>
+          <button onClick={() => go("home-cg")} style={{ background: CARD, color: RED }} className="rounded-2xl py-4 font-semibold text-sm flex items-center justify-center gap-2 border border-red-200">
+            <Phone size={16} /> {t.callElder}
+          </button>
+        </div>
+        <GhostButton onClick={() => go("home-cg")}>{t.dismiss}</GhostButton>
+      </div>
+    </div>
+  );
+
+  const AiCall = () => (
+    <div style={{ background: "#111", minHeight: "100%" }} className="flex flex-col">
+      <div className="pt-14 px-5 flex items-center justify-between mb-8">
+        <div style={{ color: "#fff", opacity: 0.7 }} className="text-sm">{t.aiCalling}</div>
+        <div style={{ background: "rgba(255,255,255,.1)", color: GREEN }} className="text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5">
+          <div style={{ background: GREEN }} className="w-2 h-2 rounded-full" /> {lang === "ru" ? "В эфире" : "Live"}
+        </div>
+      </div>
+
+      {/* Caller avatar */}
+      <div className="flex flex-col items-center mb-6">
+        <div style={{ background: BRAND }} className="w-24 h-24 rounded-full flex items-center justify-center mb-4 shadow-xl" >
+          <Brain size={44} color="#fff" />
+          {/* Pulse rings */}
+        </div>
+        <div style={{ color: "#fff" }} className="text-xl font-bold mb-1">SafeWalk AI</div>
+        <div style={{ color: "rgba(255,255,255,.6)" }} className="text-sm">{t.elderName}</div>
+        <div style={{ color: "rgba(255,255,255,.5)" }} className="text-xs mt-1">{t.aiCallDesc}</div>
+      </div>
+
+      {/* Transcript */}
+      <div className="mx-5 flex-1 mb-6 space-y-3">
+        <div style={{ background: "rgba(255,255,255,.08)" }} className="rounded-2xl p-4">
+          <div style={{ color: "rgba(255,255,255,.5)" }} className="text-xs mb-2">AI →</div>
+          <div style={{ color: "#fff" }} className="text-sm leading-relaxed">{t.aiTranscript}</div>
+        </div>
+        <div style={{ background: BRAND + "33" }} className="rounded-2xl p-4">
+          <div style={{ color: BRAND }} className="text-xs mb-2">{lang === "ru" ? "Елена →" : "Elena →"}</div>
+          <div style={{ color: "#fff" }} className="text-sm leading-relaxed">{t.elderReply}</div>
+        </div>
+        <div style={{ background: "rgba(255,255,255,.08)" }} className="rounded-2xl p-4">
+          <div style={{ color: "rgba(255,255,255,.5)" }} className="text-xs mb-2">AI →</div>
+          <div style={{ color: "#fff" }} className="text-sm leading-relaxed">{t.aiReply2}</div>
+        </div>
+      </div>
+
+      {/* Sensors strip */}
+      <div className="mx-5 mb-5">
+        <div style={{ background: "rgba(255,255,255,.06)" }} className="rounded-2xl px-4 py-3 flex items-center justify-between">
+          <div style={{ color: "rgba(255,255,255,.5)" }} className="text-xs">{t.sensors}</div>
+          <div className="flex items-center gap-3">
+            {[
+              { icon: <Activity size={12} />, label: t.accel },
+              { icon: <Radio size={12} />,    label: t.gyro },
+              { icon: <Mic size={12} />,      label: t.mic2 },
+            ].map((s, i) => (
+              <div key={i} style={{ color: GREEN }} className="flex items-center gap-1">
+                {s.icon}
+                <span className="text-xs">{s.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* End call */}
+      <div className="px-5 pb-8">
+        <button onClick={() => go("unusual")} style={{ background: RED }} className="w-full rounded-2xl py-4 font-bold text-white text-lg flex items-center justify-center gap-2">
+          <PhoneCall size={20} /> {t.endCall}
+        </button>
+      </div>
+    </div>
+  );
+
+  const BehaviorML = () => (
+    <div style={{ background: BG }}>
+      <TopBar title={t.behaviorML} onBack={() => go("home-cg")}
+        right={<div style={{ background: PURPLE + "20", color: PURPLE }} className="text-xs font-bold px-2.5 py-1.5 rounded-full flex items-center gap-1"><Brain size={11} /> AI</div>} />
+
+      <div className="px-5 space-y-3 pb-8">
+        {/* Walk times */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: TEXT }} className="font-bold text-sm mb-3 flex items-center gap-2">
+            <Activity size={15} color={BRAND} /> {t.usualWalkTimes}
+          </div>
+          <BehaviorChart />
+          <div className="flex items-center gap-3 mt-2">
+            <div style={{ background: BRAND + "22", color: BRAND }} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold">
+              <div style={{ background: BRAND }} className="w-2 h-2 rounded-full" /> {lang === "ru" ? "Обычно" : "Normal"}
+            </div>
+            <div style={{ background: RED + "22", color: RED }} className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold">
+              <div style={{ background: RED }} className="w-2 h-2 rounded-full" /> {t.anomaly}
+            </div>
+          </div>
+        </div>
+
+        {/* Usual places */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: TEXT }} className="font-bold text-sm mb-3 flex items-center gap-2">
+            <MapPin size={15} color={BLUE} /> {t.usualPlaces}
+          </div>
+          {[
+            { name: lang === "ru" ? "Дом" : "Home",   freq: lang === "ru" ? "Каждый день" : "Every day",     color: GREEN, pct: 100 },
+            { name: lang === "ru" ? "Парк" : "Park",   freq: lang === "ru" ? "3-4 раза в нед." : "3-4x / week", color: BLUE,  pct: 75 },
+            { name: lang === "ru" ? "Магазин" : "Shop", freq: lang === "ru" ? "1-2 раза в нед." : "1-2x / week", color: BRAND, pct: 40 },
+          ].map((p, i) => (
+            <div key={i} className="mb-3">
+              <div className="flex justify-between mb-1">
+                <span style={{ color: TEXT }} className="text-sm font-semibold">{p.name}</span>
+                <span style={{ color: SUB }} className="text-xs">{p.freq}</span>
+              </div>
+              <div style={{ background: LINE }} className="h-2 rounded-full">
+                <div style={{ background: p.color, width: `${p.pct}%`, transition: "width .5s" }} className="h-2 rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Sleep pattern */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: TEXT }} className="font-bold text-sm mb-2 flex items-center gap-2">
+            <Moon size={15} color={PURPLE} /> {t.sleepPattern}
+          </div>
+          <div style={{ background: "#f5f3ff", color: PURPLE }} className="rounded-xl px-3 py-2 text-sm font-semibold">{t.usualSleep}</div>
+          <div style={{ color: SUB }} className="text-xs mt-2">
+            {lang === "ru" ? "Активность в 02:15 → аномалия ночной прогулки" : "Activity at 2:15 AM → night walk anomaly"}
+          </div>
+        </div>
+
+        {/* Model confidence */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border flex items-center justify-between">
+          <div>
+            <div style={{ color: TEXT }} className="font-bold text-sm">{t.modelConfidence}</div>
+            <div style={{ color: SUB }} className="text-xs">{lang === "ru" ? "На основе 14 дней данных" : "Based on 14 days of data"}</div>
+          </div>
+          <div style={{ color: GREEN }} className="font-bold text-2xl">87%</div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const FallDetect = () => (
+    <div style={{ background: BG }}>
+      {/* Red header */}
+      <div style={{ background: RED }} className="px-5 pt-14 pb-5">
+        <div className="flex items-center gap-3 mb-3">
+          <div style={{ background: "rgba(255,255,255,.2)" }} className="w-12 h-12 rounded-2xl flex items-center justify-center">
+            <AlertTriangle size={26} color="#fff" />
+          </div>
+          <div>
+            <div className="text-white font-bold text-xl">{t.fallDetected}</div>
+            <div className="text-white opacity-80 text-sm">{t.fallLocation}</div>
+          </div>
+        </div>
+        <div style={{ background: "rgba(255,255,255,.15)" }} className="rounded-2xl px-4 py-2.5">
+          <div className="text-white text-sm font-semibold">{t.fallAnalysis}</div>
+        </div>
+      </div>
+
+      <div className="px-5 pt-4 pb-8 space-y-3">
+        {/* Sensor analysis */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: TEXT }} className="font-bold text-sm mb-3">{lang === "ru" ? "Анализ датчиков" : "Sensor analysis"}</div>
+          {[
+            { icon: <Activity size={16} />, label: lang === "ru" ? "Акселерометр" : "Accelerometer", val: lang === "ru" ? "Резкое ускорение 8G" : "Sudden 8G jolt",        color: RED,   ok: false },
+            { icon: <Radio size={16} />,    label: lang === "ru" ? "Гироскоп" : "Gyroscope",         val: lang === "ru" ? "Быстрое вращение" : "Rapid rotation",           color: RED,   ok: false },
+            { icon: <Mic size={16} />,      label: lang === "ru" ? "Микрофон" : "Microphone",        val: lang === "ru" ? "Звук удара detected" : "Impact sound detected",  color: RED,   ok: false },
+            { icon: <MapPin size={16} />,   label: "GPS",                                            val: lang === "ru" ? "Нет движения 4 мин" : "No movement 4 min",      color: YELLOW,ok: false },
+          ].map((s, i) => (
+            <div key={i} style={{ background: BG }} className="rounded-2xl px-3 py-2.5 flex items-center gap-3 mb-2">
+              <div style={{ color: s.color }} className="shrink-0">{s.icon}</div>
+              <div className="flex-1">
+                <div style={{ color: TEXT }} className="text-sm font-semibold">{s.label}</div>
+                <div style={{ color: SUB }} className="text-xs">{s.val}</div>
+              </div>
+              <div style={{ background: s.color + "20", color: s.color }} className="text-xs font-bold px-2 py-0.5 rounded-full">
+                {lang === "ru" ? "Аномалия" : "Anomaly"}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Actions */}
+        <PrimaryButton color={RED} icon={<Phone size={18} />} onClick={() => go("home-cg")}>{t.call112}</PrimaryButton>
+        <GhostButton icon={<PhoneCall size={18} />} onClick={() => go("home-cg")}>{t.contactCaretaker}</GhostButton>
+        <GhostButton onClick={() => go("home-cg")}>{t.dismiss}</GhostButton>
+      </div>
     </div>
   );
 
   const ElderHome = () => (
-    <>
-      <div className="px-5 pt-12 pb-4">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <div style={{ color: SUB }} className="text-sm font-medium">{t.sunday}</div>
-            <div style={{ color: TEXT }} className="text-2xl font-bold mt-1">
-              {t.goodMorning}, {userFirstName || t.friend}
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setScreen("rewards")}
-              style={{ background: effectiveStreak > 0 ? "#fff7ed" : CARD, borderColor: effectiveStreak > 0 ? "#ff7d29" : LINE }}
-              className="h-11 px-2.5 rounded-full flex items-center gap-1 border relative"
-            >
-              <span style={{ fontSize: 20, lineHeight: 1 }}>{"\ud83d\udd25"}</span>
-              <span style={{ color: effectiveStreak > 0 ? "#ff7d29" : SUB, fontWeight: 800, fontSize: 15 }}>
-                {effectiveStreak}
-              </span>
-              {availableCouponCount > 0 && (
-                <span
-                  style={{ position: "absolute", top: -4, right: -4, background: "#ef4444", color: "#fff", minWidth: 18, height: 18, borderRadius: 999, fontSize: 10, fontWeight: 700 }}
-                  className="flex items-center justify-center px-1"
-                >
-                  {availableCouponCount}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setScreen("settingsElder")}
-              style={{ background: CARD }}
-              className="w-11 h-11 rounded-full flex items-center justify-center border"
-            >
-              <SettingsIcon size={20} color={TEXT} />
-            </button>
-            <Avatar />
-          </div>
+    <div style={{ background: "#fff", minHeight: "100%" }} className="flex flex-col">
+      <div className="pt-14 px-6 pb-4 flex-1 flex flex-col">
+        {/* Time */}
+        <div className="text-center mt-4 mb-6">
+          <div style={{ color: TEXT, fontSize: 56, fontWeight: 800, lineHeight: 1 }}>14:32</div>
+          <div style={{ color: SUB, fontSize: 18 }} className="mt-2">{lang === "ru" ? "Воскресенье, 19 апреля" : "Sunday, April 19"}</div>
         </div>
 
-        <button
-          onClick={() => setScreen("rewards")}
-          style={{ background: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #fef3c7 100%)" }}
-          className="w-full rounded-3xl p-4 mb-3 border text-left shadow-sm relative overflow-hidden"
-        >
-          <div className="flex items-center gap-3">
-            <div style={{ background: "rgba(255,255,255,.7)", borderRadius: 20 }} className="p-1">
-              <Plant adherence={adherence} size={96} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div style={{ color: "#14532d" }} className="font-bold text-base leading-tight">
-                {adherence >= 1 ? t.plantFlowered : adherence >= 0.5 ? t.plantGrowing : t.plantWilting}
-              </div>
-              <div style={{ color: "#166534" }} className="text-xs mt-1">
-                {daysToNextCoupon > 0
-                  ? daysToNextCoupon + " " + t.toCoupon
-                  : t.couponAvailable}
-              </div>
-            </div>
-            <ChevronRight size={22} color="#166534" />
-          </div>
-          {availableCouponCount > 0 && (
-            <div style={{ position: "absolute", top: 10, right: 10, background: "#ef4444", color: "#fff", minWidth: 22, height: 22, borderRadius: 999 }} className="text-xs font-bold flex items-center justify-center px-1.5">
-              {availableCouponCount}
-            </div>
-          )}
+        {/* Greeting */}
+        <div style={{ color: TEXT, fontSize: 22, fontWeight: 700, lineHeight: 1.3 }} className="text-center mb-6">
+          {t.elderHome}
+        </div>
+
+        {/* Status */}
+        <div style={{ background: "#d1fae5", color: GREEN, fontSize: 18, fontWeight: 700 }}
+          className="rounded-3xl py-4 flex items-center justify-center gap-3 mb-6">
+          <Home size={24} /> {lang === "ru" ? "Вы дома" : "You are at home"}
+        </div>
+
+        {/* I'm home button */}
+        <button onClick={() => showToast(t.iAmHome)} style={{ background: BRAND, color: "#fff", fontSize: 18, fontWeight: 700 }}
+          className="w-full rounded-3xl py-5 flex items-center justify-center gap-3 shadow-lg mb-4">
+          <Check size={24} /> {t.iAmHome}
         </button>
 
-        <div
-          style={{ background: `linear-gradient(135deg, ${BRAND} 0%, #ff9a55 100%)` }}
-          className="rounded-3xl p-5 text-white shadow-lg"
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm opacity-90">{t.today}</div>
-              <div className="flex items-baseline gap-2 mt-1">
-                <div className="text-5xl font-bold leading-none">{dosesLeft}</div>
-                <div className="text-sm opacity-90">{t.dosesLeftToday}</div>
-              </div>
-            </div>
-            <div className="flex flex-col items-center">
-              <button
-                onMouseDown={() => setRecording(true)}
-                onMouseUp={() => setRecording(false)}
-                onMouseLeave={() => setRecording(false)}
-                onTouchStart={() => setRecording(true)}
-                onTouchEnd={() => setRecording(false)}
-                style={{
-                  background: "#fff",
-                  color: BRAND,
-                  boxShadow: recording
-                    ? "0 0 0 12px rgba(255,255,255,.3), 0 0 0 24px rgba(255,255,255,.15)"
-                    : "0 10px 25px rgba(0,0,0,.2)",
-                }}
-                className="w-24 h-24 rounded-full flex items-center justify-center transition-all"
-              >
-                <Mic size={44} />
-              </button>
-              <div className="text-xs mt-2 font-medium">
-                {recording ? t.listening : t.holdToSpeak}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-5">
-        <div className="flex items-center justify-between mb-1">
-          <div style={{ color: TEXT }} className="font-bold text-lg">{t.myMeds}</div>
-          <button
-            onClick={() => setScreen("addMed")}
-            style={{ background: BRAND, color: "#fff" }}
-            className="w-10 h-10 rounded-full flex items-center justify-center shadow-md"
-          >
-            <Plus size={22} />
-          </button>
-        </div>
-        <div style={{ color: SUB }} className="text-xs mb-3">{t.tapToTake}</div>
-
-        <div className="space-y-2">
-          {meds.length === 0 && (
-            <div style={{ background: CARD, color: SUB }} className="rounded-2xl p-5 text-center border text-sm">
-              {t.noMeds}
-            </div>
-          )}
-          {meds.map((m) => {
-            const done = m.taken >= m.total;
-            return (
-              <button
-                key={m.id}
-                onClick={() => takeDose(m.id)}
-                style={{ background: CARD, opacity: done ? 0.7 : 1 }}
-                className="w-full rounded-2xl p-3 flex items-center gap-3 border text-left"
-              >
-                <div
-                  style={{ background: m.color + "22", color: m.color }}
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                >
-                  <Pill size={22} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div
-                    style={{ color: TEXT, textDecoration: done ? "line-through" : "none" }}
-                    className="font-semibold text-base truncate"
-                  >
-                    {m.name}
-                  </div>
-                  <div style={{ color: SUB }} className="text-xs flex items-center gap-1 mt-0.5">
-                    <Clock size={12} /> {getMedicationTimesText(m)}{" \u00b7 "}{m.pillsPerDose} {t.pcs}
-                  </div>
-                </div>
-                <CircleProgress value={m.taken} total={m.total} color={m.color} size={52} stroke={5} />
-              </button>
-            );
-          })}
-        </div>
-
-        <button
-          onClick={() => setScreen("scan")}
-          style={{ background: TEXT, color: "#fff" }}
-          className="w-full rounded-3xl p-4 mt-4 mb-6 flex items-center gap-3 shadow-md"
-        >
-          <div style={{ background: BRAND }} className="w-12 h-12 rounded-2xl flex items-center justify-center">
-            <Scan size={24} color="#fff" />
-          </div>
-          <div className="flex-1 text-left">
-            <div className="font-semibold">{t.scanRx}</div>
-            <div className="text-xs opacity-80">{t.scanRxDesc}</div>
-          </div>
-          <ChevronRight size={22} />
+        {/* SOS */}
+        <button onClick={() => go("fall-detect")} style={{ background: RED, color: "#fff", fontSize: 24, fontWeight: 900, letterSpacing: 3 }}
+          className="w-full rounded-3xl py-6 flex items-center justify-center gap-3 shadow-xl">
+          <AlertTriangle size={28} /> {t.sos}
         </button>
+
+        <div className="flex-1" />
+
+        {/* Connected indicator */}
+        <div style={{ color: SUB }} className="text-center text-sm flex items-center justify-center gap-2 pb-4">
+          <div style={{ background: GREEN }} className="w-2 h-2 rounded-full" />
+          {t.connectedTo}: {lang === "ru" ? "Алекс" : "Alex"}
+        </div>
       </div>
-    </>
+    </div>
   );
-
-  const AddMed = () => {
-    const [name, setName] = useState("");
-    const [pills, setPills] = useState(1);
-    const [slots, setSlots] = useState([
-      { key: "morning", labelRu: "\u0423\u0442\u0440\u043e",  labelEn: "Morning", time: "08:00", active: true  },
-      { key: "noon",    labelRu: "\u0414\u0435\u043d\u044c",  labelEn: "Noon",    time: "13:00", active: true  },
-      { key: "evening", labelRu: "\u0412\u0435\u0447\u0435\u0440", labelEn: "Evening", time: "19:00", active: true  },
-      { key: "night",   labelRu: "\u041d\u043e\u0447\u044c",  labelEn: "Night",   time: "22:00", active: false },
-    ]);
-    const [error, setError] = useState("");
-
-    const toggleSlot = (i) =>
-      setSlots((p) => p.map((s, idx) => (idx === i ? { ...s, active: !s.active } : s)));
-    const setSlotTime = (i, time) =>
-      setSlots((p) => p.map((s, idx) => (idx === i ? { ...s, time } : s)));
-
-    const activeSchedule = sortSchedule(
-      slots
-        .filter((s) => s.active)
-        .map((slot) => ({
-          key: slot.key,
-          label: lang === "ru" ? slot.labelRu : slot.labelEn,
-          time: slot.time || DEFAULT_TIME,
-        }))
-    );
-    const activeCount = activeSchedule.length;
-
-    const handleSave = () => {
-      if (!name.trim()) return setError(t.nameRequired);
-      if (activeCount === 0) return setError(t.selectAtLeastOne);
-      addMedication({
-        name: name.trim(),
-        total: activeCount * pills,
-        pillsPerDose: pills,
-        schedule: activeSchedule,
-      });
-      showToast(`${name.trim()} \u00b7 ${t.added}`);
-      setScreen("elder");
-    };
-
-    return (
-      <>
-        <TopBar title={t.newMed} onBack={() => setScreen("elder")} />
-        <div className="px-5 pb-8">
-          <Field
-            label={t.medName}
-            placeholder={t.medNamePh}
-            value={name}
-            onChange={(v) => { setName(v); setError(""); }}
-          />
-
-          <div className="mt-4">
-            <div style={{ color: SUB }} className="text-xs font-medium ml-4 mb-2">{t.pillsPerDose}</div>
-            <div style={{ background: CARD }} className="rounded-2xl p-2 flex items-center justify-between border">
-              <button
-                onClick={() => setPills(Math.max(1, pills - 1))}
-                style={{ background: BRAND_SOFT, color: BRAND }}
-                className="w-10 h-10 rounded-xl font-bold text-xl"
-              >{"\u2212"}</button>
-              <div style={{ color: TEXT }} className="text-2xl font-bold">{pills} {t.pcs}</div>
-              <button
-                onClick={() => setPills(pills + 1)}
-                style={{ background: BRAND_SOFT, color: BRAND }}
-                className="w-10 h-10 rounded-xl font-bold text-xl"
-              >+</button>
-            </div>
-          </div>
-
-          <div className="mt-4">
-            <div className="flex items-center justify-between ml-4 mb-2">
-              <div style={{ color: SUB }} className="text-xs font-medium">{t.schedule}</div>
-              <div style={{ color: BRAND }} className="text-xs font-semibold">
-                {activeCount}{" \u00d7 "}{pills} = {activeCount * pills} {t.pcs}
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-2">
-              {slots.map((s, i) => {
-                const on = s.active;
-                const label = lang === "ru" ? s.labelRu : s.labelEn;
-                return (
-                  <div
-                    key={s.key}
-                    style={{
-                      background: on ? BRAND_SOFT : CARD,
-                      borderColor: on ? BRAND : LINE,
-                    }}
-                    className="rounded-2xl p-3 border"
-                  >
-                    <button
-                      onClick={() => toggleSlot(i)}
-                      type="button"
-                      className="w-full flex items-center gap-2 mb-2"
-                    >
-                      <div
-                        style={{
-                          background: on ? BRAND : "#fff",
-                          borderColor: on ? BRAND : LINE,
-                          color: "#fff",
-                        }}
-                        className="w-6 h-6 rounded-md border flex items-center justify-center shrink-0"
-                      >
-                        {on && <Check size={16} />}
-                      </div>
-                      <span style={{ color: TEXT }} className="font-semibold">{label}</span>
-                    </button>
-                    <div className="flex items-center gap-2">
-                      <Clock size={14} color={on ? BRAND : SUB} />
-                      <input
-                        type="time"
-                        value={s.time}
-                        disabled={!on}
-                        onChange={(e) => setSlotTime(i, e.target.value)}
-                        style={{
-                          background: "#fff",
-                          color: on ? TEXT : SUB,
-                          borderColor: LINE,
-                          fontSize: 16,
-                          fontWeight: 600,
-                        }}
-                        className="flex-1 rounded-lg px-2 py-1 border outline-none"
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {activeCount > 0 && (
-              <div
-                style={{ background: CARD, color: TEXT }}
-                className="rounded-2xl border px-4 py-3 mt-3"
-              >
-                <div style={{ color: SUB }} className="text-[11px] font-medium uppercase tracking-wide mb-1">
-                  {t.schedule}
-                </div>
-                <div className="text-sm font-semibold">
-                  {getMedicationTimesText({ schedule: activeSchedule })}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {error && (
-            <div
-              style={{ background: "#fee2e2", color: RED }}
-              className="rounded-2xl px-4 py-2 mt-4 text-sm flex items-center gap-2"
-            >
-              <AlertCircle size={16} /> {error}
-            </div>
-          )}
-
-          <div className="grid grid-cols-2 gap-3 mt-6">
-            <GhostButton onClick={() => setScreen("elder")}>{t.cancel}</GhostButton>
-            <PrimaryButton onClick={handleSave} icon={<Check size={20} />}>{t.save}</PrimaryButton>
-          </div>
-        </div>
-      </>
-    );
-  };
-
-  const ScanRx = () => {
-    const detected = [
-      { name: lang === "ru" ? "\u0413\u043b\u0438\u043a\u043e\u043d\u0438\u043b 500\u043c\u0433" : "Gliconil 500mg",         total: 2, time: "08:00" },
-      { name: lang === "ru" ? "\u0410\u0442\u043e\u0440\u0432\u0430\u0441\u0442\u0430\u0442\u0438\u043d 10\u043c\u0433" : "Atorvastatin 10mg",   total: 1, time: "20:00" },
-      { name: lang === "ru" ? "\u0422\u0440\u043e\u043c\u0431\u043e\u043f\u043e\u043b 75\u043c\u0433" : "Trombopol 75mg",         total: 1, time: "14:00" },
-    ];
-    const addAll = () => {
-      detected.forEach((d) => addMedication(d));
-      showToast(`${detected.length} \u00b7 ${t.added}`);
-      setScreen("elder");
-    };
-    return (
-      <>
-        <TopBar title={t.scanRx} onBack={() => setScreen("elder")} />
-        <div className="px-5">
-          <div
-            style={{
-              background: "linear-gradient(135deg,#1f2937 0%,#0f172a 100%)",
-              borderRadius: 24, height: 260, position: "relative",
-            }}
-            className="overflow-hidden mb-4"
-          >
-            <div
-              style={{
-                position: "absolute", inset: "18% 12%",
-                background: "#fef3c7", transform: "rotate(-2deg)", borderRadius: 6,
-                boxShadow: "0 10px 30px rgba(0,0,0,.4)", padding: 12,
-                fontFamily: "monospace", fontSize: 9, color: "#713f12", lineHeight: 1.3,
-              }}
-            >
-              <div style={{ fontWeight: 700, fontSize: 10 }}>{"Rx / \u0420\u0435\u0446\u0435\u043f\u0442"}</div>
-              <div style={{ borderTop: "1px solid #713f12", margin: "4px 0" }} />
-              {detected.map((d, i) => (
-                <div key={i}>{i + 1}. {d.name}{" \u00b7 "}{d.total}{"\u00d7/"}{lang === "ru" ? "\u0434\u0435\u043d\u044c" : "day"}</div>
-              ))}
-            </div>
-            <div style={{ position: "absolute", inset: 20, border: `2px solid ${BRAND}`, borderRadius: 18 }} />
-            <div style={{ position: "absolute", left: 20, right: 20, top: "50%", height: 2, background: BRAND, boxShadow: `0 0 12px ${BRAND}` }} />
-            <div
-              style={{ position: "absolute", top: 12, left: 12, background: "rgba(0,0,0,.5)", color: "#fff" }}
-              className="px-3 py-1 rounded-full text-xs flex items-center gap-1"
-            >
-              <span style={{ width: 8, height: 8, background: BRAND, borderRadius: 999, display: "inline-block" }} />
-              {t.scanning}
-            </div>
-          </div>
-
-          <div style={{ color: SUB }} className="text-xs font-semibold uppercase tracking-wider mb-2 ml-1">
-            {t.detected}{" \u00b7 OCR"}
-          </div>
-
-          <div className="space-y-2 mb-4">
-            {detected.map((d, i) => (
-              <div key={i} style={{ background: CARD }} className="rounded-2xl p-3 flex items-center gap-3 border">
-                <div style={{ background: BRAND_SOFT, color: BRAND }} className="w-10 h-10 rounded-xl flex items-center justify-center">
-                  <Check size={20} />
-                </div>
-                <div className="flex-1">
-                  <div style={{ color: TEXT }} className="font-semibold">{d.name}</div>
-                  <div style={{ color: SUB }} className="text-xs">
-                    {d.total}{"\u00d7/"}{lang === "ru" ? "\u0434\u0435\u043d\u044c" : "day"}{" \u00b7 "}{t.at} {d.time}
-                  </div>
-                </div>
-                <div style={{ background: BRAND, color: "#fff" }} className="w-7 h-7 rounded-lg flex items-center justify-center">
-                  <Check size={16} />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <PrimaryButton onClick={addAll} icon={<Plus size={20} />}>{t.addAll}</PrimaryButton>
-          <div className="h-6" />
-        </div>
-      </>
-    );
-  };
-
-  const SettingsElder = () => (
-    <>
-      <TopBar title={t.settings} onBack={() => setScreen("elder")} />
-      <div className="px-5 pb-8">
-        <div style={{ background: CARD }} className="rounded-3xl p-4 border flex items-center gap-3 mb-4">
-          <Avatar size={56} />
-          <div className="flex-1 min-w-0">
-            <div style={{ color: TEXT }} className="font-semibold text-lg truncate">
-              {profileName || "\u2014"}
-            </div>
-            <div style={{ color: SUB }} className="text-sm truncate">{userEmail || "\u2014"}</div>
-          </div>
-        </div>
-
-        <div style={{ background: CARD }} className="rounded-3xl p-5 border mb-4 flex flex-col items-center">
-          <div style={{ color: TEXT }} className="font-bold text-base">{t.pairingTitle}</div>
-          <div style={{ color: SUB }} className="text-xs text-center mt-1 mb-3">{t.pairingQRDesc}</div>
-          <FakeQR size={170} />
-          <div
-            style={{ background: BRAND_SOFT, color: BRAND }}
-            className="px-3 py-1 rounded-full mt-3 text-xs font-semibold flex items-center gap-1"
-          >
-            <QrCode size={14} /> MED-{(user.firstName?.[0] || "X").toUpperCase()}{(user.lastName?.[0] || "X").toUpperCase()}-2026-XK7Q
-          </div>
-          <div style={{ color: SUB }} className="text-xs mt-2">
-            {paired ? `${t.pairedWith} Elena` : t.notPaired}
-          </div>
-        </div>
-
-        <SettingsRow
-          icon={<Globe size={18} />} label={t.language}
-          value={lang === "ru" ? "\u0420\u0443\u0441\u0441\u043a\u0438\u0439" : "English"}
-          onClick={() => setLang(lang === "ru" ? "en" : "ru")}
-        />
-
-        <div style={{ background: CARD }} className="rounded-2xl px-4 py-3 border mb-2">
-          <div className="flex items-center gap-3">
-            <div style={{ background: BRAND_SOFT, color: BRAND }} className="w-9 h-9 rounded-xl flex items-center justify-center">
-              <Type size={18} />
-            </div>
-            <span style={{ color: TEXT }} className="font-medium">{t.fontSize}</span>
-          </div>
-          <div className="grid grid-cols-3 gap-2 mt-3">
-            {["small", "medium", "large"].map((s) => (
-              <button
-                key={s}
-                onClick={() => setFontSize(s)}
-                style={{
-                  background: fontSize === s ? BRAND : CARD,
-                  color: fontSize === s ? "#fff" : TEXT,
-                  borderColor: fontSize === s ? BRAND : LINE,
-                }}
-                className="rounded-xl py-2 border font-semibold"
-              >
-                A<span className="text-xs ml-1 opacity-80">
-                  {s === "small" ? t.small : s === "medium" ? t.medium : t.large}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <SettingsRow icon={<Bell size={18} />} label={t.notifications} value="On" />
-        <SettingsRow icon={<Volume2 size={18} />} label={t.voice} value="On" />
-        <SettingsRow icon={<HelpCircle size={18} />} label={t.help} />
-        <SettingsRow icon={<LogOut size={18} />} label={t.logout} danger onClick={resetDemo} />
-      </div>
-    </>
-  );
-
-  const CaregiverHome = () => {
-    const takenPct = allTotal > 0 ? Math.round((takenTotal / allTotal) * 100) : 0;
-    const nextMed = meds.find((m) => m.taken < m.total);
-    return (
-      <>
-        <div className="px-5 pt-12 pb-4">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div style={{ color: SUB }} className="text-sm font-medium">{t.sunday}</div>
-              <div style={{ color: TEXT }} className="text-2xl font-bold mt-1">{t.caregiverHome}</div>
-            </div>
-            <div className="flex items-center gap-2">
-              {paired && (
-                <div
-                  style={{ background: effectiveStreak > 0 ? "#fff7ed" : CARD, borderColor: effectiveStreak > 0 ? "#ff7d29" : LINE }}
-                  className="h-11 px-2.5 rounded-full flex items-center gap-1 border relative"
-                >
-                  <span style={{ fontSize: 20, lineHeight: 1 }}>{"\ud83d\udd25"}</span>
-                  <span style={{ color: effectiveStreak > 0 ? "#ff7d29" : SUB, fontWeight: 800, fontSize: 15 }}>
-                    {effectiveStreak}
-                  </span>
-                  {availableCouponCount > 0 && (
-                    <span
-                      style={{ position: "absolute", top: -4, right: -4, background: "#ef4444", color: "#fff", minWidth: 18, height: 18, borderRadius: 999, fontSize: 10, fontWeight: 700 }}
-                      className="flex items-center justify-center px-1"
-                    >
-                      {availableCouponCount}
-                    </span>
-                  )}
-                </div>
-              )}
-              <button
-                onClick={() => setScreen("settingsCare")}
-                style={{ background: CARD }}
-                className="w-11 h-11 rounded-full flex items-center justify-center border"
-              >
-                <SettingsIcon size={20} color={TEXT} />
-              </button>
-              <Avatar size={44} />
-            </div>
-          </div>
-
-          {paired ? (
-            <>
-              <div style={{ background: CARD }} className="rounded-3xl p-4 border flex items-center gap-3 mb-4">
-                <div className="relative">
-                  <div style={{ background: BRAND }} className="w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-xl">{"\u0415"}</div>
-                  <div style={{ background: GREEN, border: "2px solid #fff" }} className="absolute bottom-0 right-0 w-4 h-4 rounded-full" />
-                </div>
-                <div className="flex-1">
-                  <div style={{ color: TEXT }} className="font-semibold text-lg">{t.elderDemo}</div>
-                  <div style={{ color: GREEN }} className="text-xs font-medium flex items-center gap-1">
-                    <span style={{ width: 6, height: 6, background: GREEN, borderRadius: 999, display: "inline-block" }} />
-                    {t.connected}
-                  </div>
-                </div>
-                <button style={{ background: GREEN }} className="w-11 h-11 rounded-full flex items-center justify-center shadow-md">
-                  <Phone size={20} color="#fff" />
-                </button>
-              </div>
-
-              <div style={{ background: CARD }} className="rounded-3xl p-5 border flex items-center gap-4 mb-4">
-                <CircleProgress value={takenTotal} total={allTotal || 1} color={BRAND} size={90} stroke={10}>
-                  <span style={{ color: TEXT, fontSize: 22, fontWeight: 800 }}>{takenPct}%</span>
-                </CircleProgress>
-                <div className="flex-1">
-                  <div style={{ color: SUB }} className="text-xs font-semibold uppercase tracking-wide">{t.adherence}</div>
-                  <div style={{ color: TEXT }} className="text-lg font-bold">{takenTotal}/{allTotal} {t.taken.toLowerCase()}</div>
-                  <div style={{ color: SUB }} className="text-xs mt-1">
-                    {t.upcoming}: {nextMed ? (
-                      <span style={{ color: BRAND, fontWeight: 600 }}>{nextMed.time}{" \u00b7 "}{nextMed.name}</span>
-                    ) : "\u2014"}
-                  </div>
-                </div>
-              </div>
-
-              <div style={{ background: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #fef3c7 100%)" }} className="rounded-3xl p-4 border mb-4 flex items-center gap-3">
-                <div style={{ background: "rgba(255,255,255,.7)", borderRadius: 16 }} className="p-1">
-                  <Plant adherence={adherence} size={80} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div style={{ color: "#166534" }} className="text-xs font-semibold uppercase tracking-wide">{t.elderPlant}</div>
-                  <div style={{ color: "#14532d" }} className="font-bold text-base leading-tight mt-1">
-                    {adherence >= 1 ? t.plantFlowered : adherence >= 0.5 ? t.plantGrowing : t.plantWilting}
-                  </div>
-                </div>
-                {availableCouponCount > 0 && (
-                  <div style={{ background: "#ff7d29", color: "#fff" }} className="px-2 py-1 rounded-full text-xs font-bold">
-                    {availableCouponCount} {t.coupons.toLowerCase()}
-                  </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <button
-              onClick={() => setScreen("pairScan")}
-              style={{ background: CARD }}
-              className="w-full rounded-3xl p-5 border flex items-center gap-3 mb-4 text-left"
-            >
-              <div style={{ background: BRAND_SOFT, color: BRAND }} className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0">
-                <QrCode size={28} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div style={{ color: TEXT }} className="font-bold text-base">{t.notPaired}</div>
-                <div style={{ color: SUB }} className="text-xs mt-0.5">{t.scanQRDesc}</div>
-              </div>
-              <ChevronRight size={22} color={SUB} />
-            </button>
-          )}
-        </div>
-
-        {paired && (
-          <div className="px-5">
-            <div style={{ color: TEXT }} className="font-bold text-lg mb-3">{t.timeline}</div>
-
-            <div className="space-y-2">
-              {meds.map((m) => {
-                const status =
-                  m.taken >= m.total ? "taken" :
-                  m.taken > 0 ? "pending" : "pending";
-                const color =
-                  status === "taken" ? GREEN :
-                  status === "missed" ? RED : BRAND;
-                const label =
-                  status === "taken" ? t.taken :
-                  status === "missed" ? t.missed : t.pending;
-                return (
-                  <div key={m.id} style={{ background: CARD }} className="rounded-2xl p-3 flex items-center gap-3 border">
-                    <div style={{ color: TEXT }} className="w-16 text-sm font-bold">{m.time}</div>
-                    <div className="flex-1 min-w-0">
-                      <div style={{ color: TEXT }} className="font-semibold truncate">{m.name}</div>
-                      <div style={{ color: SUB }} className="text-xs truncate">
-                        {getMedicationTimesText(m)}{" \u00b7 "}{m.taken}/{m.total}
-                      </div>
-                    </div>
-                    <div
-                      style={{ background: color + "22", color }}
-                      className="px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1"
-                    >
-                      {status === "taken" && <Check size={12} />}
-                      {status === "pending" && <Clock size={12} />}
-                      {label}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            <div className="grid grid-cols-3 gap-2 mt-4 mb-4">
-              <button
-                onClick={() => setScreen("addMed")}
-                style={{ background: CARD }}
-                className="rounded-2xl border py-3 flex flex-col items-center gap-1"
-              >
-                <div style={{ background: BRAND_SOFT, color: BRAND }} className="w-10 h-10 rounded-xl flex items-center justify-center">
-                  <Plus size={20} />
-                </div>
-                <span style={{ color: TEXT }} className="text-xs font-semibold">{t.meds}</span>
-              </button>
-              <button
-                onClick={() => setScreen("scan")}
-                style={{ background: CARD }}
-                className="rounded-2xl border py-3 flex flex-col items-center gap-1"
-              >
-                <div style={{ background: BRAND_SOFT, color: BRAND }} className="w-10 h-10 rounded-xl flex items-center justify-center">
-                  <Scan size={20} />
-                </div>
-                <span style={{ color: TEXT }} className="text-xs font-semibold">{t.scanRx.split(" ")[0]}</span>
-              </button>
-              <button style={{ background: CARD }} className="rounded-2xl border py-3 flex flex-col items-center gap-1">
-                <div style={{ background: "#fee2e2", color: RED }} className="w-10 h-10 rounded-xl flex items-center justify-center">
-                  <AlertCircle size={20} />
-                </div>
-                <span style={{ color: TEXT }} className="text-xs font-semibold">{t.alerts}</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2 mb-6">
-              <button style={{ background: GREEN, color: "#fff" }} className="rounded-2xl py-3 font-semibold flex items-center justify-center gap-2 shadow">
-                <Phone size={18} /> {t.call}
-              </button>
-              <button style={{ background: BRAND, color: "#fff" }} className="rounded-2xl py-3 font-semibold flex items-center justify-center gap-2 shadow">
-                <MessageSquare size={18} /> {t.message}
-              </button>
-            </div>
-          </div>
-        )}
-      </>
-    );
-  };
 
   const SettingsCare = () => (
-    <>
-      <TopBar title={t.settings} onBack={() => setScreen("caregiver")} />
-      <div className="px-5 pb-8">
-        <div style={{ background: CARD }} className="rounded-3xl p-4 border flex items-center gap-3 mb-4">
-          <Avatar size={56} />
-          <div className="flex-1 min-w-0">
-            <div style={{ color: TEXT }} className="font-semibold text-lg truncate">
-              {profileName || (lang === "ru" ? "\u0421\u0430\u0443\u043b\u0435 \u0410\u0445\u043c\u0435\u0442\u043e\u0432\u0430" : "Saule Akhmetova")}
-            </div>
-            <div style={{ color: SUB }} className="text-sm truncate">{userEmail || "saule@mail.com"}</div>
-          </div>
-        </div>
+    <div className="flex flex-col h-full" style={{ background: BG }}>
+      <TopBar title={t.settings} onBack={() => go("home-cg")} />
+      <div className="px-5 pb-8 space-y-2 flex-1">
 
-        <div style={{ color: SUB }} className="text-xs font-semibold uppercase tracking-wider mb-2 ml-1">{t.connected}</div>
-        {paired ? (
-          <div style={{ background: CARD }} className="rounded-3xl p-4 border flex items-center gap-3 mb-4">
-            <div style={{ background: BRAND }} className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold">{"\u0415"}</div>
-            <div className="flex-1">
-              <div style={{ color: TEXT }} className="font-semibold">{t.elderDemo}</div>
-              <div style={{ color: GREEN }} className="text-xs">
-                {"\u25cf "}{t.connected}
-              </div>
-            </div>
-            <button
-              onClick={() => setPaired(false)}
-              style={{ background: "#fee2e2", color: RED }}
-              className="w-9 h-9 rounded-xl flex items-center justify-center"
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
-        ) : (
-          <div style={{ background: CARD }} className="rounded-3xl p-4 border flex items-center gap-3 mb-4">
-            <div style={{ background: "#f3f4f6", color: SUB }} className="w-12 h-12 rounded-full flex items-center justify-center">
-              <User size={20} />
-            </div>
-            <div className="flex-1">
-              <div style={{ color: SUB }} className="font-semibold">{t.notPaired}</div>
-              <div style={{ color: SUB }} className="text-xs">{"\u25cb "}{t.scanQRDesc}</div>
-            </div>
-          </div>
-        )}
+        <div style={{ color: SUB }} className="text-xs uppercase tracking-wider font-semibold mb-2 mt-1">{lang === "ru" ? "Профиль" : "Profile"}</div>
+        <SettingsRow icon={<User size={18} />} label={t.profile} value={user.firstName || "Алекс"} onClick={() => {}} />
+        <SettingsRow icon={<UserPlus size={18} />} label={t.pairedDevice} value={t.elderName} onClick={() => {}} />
 
-        <button
-          onClick={() => setScreen("pairScan")}
-          style={{ background: BRAND, color: "#fff" }}
-          className="w-full rounded-3xl p-4 mb-4 flex items-center gap-3 shadow-md"
-        >
-          <div style={{ background: "rgba(255,255,255,.25)" }} className="w-12 h-12 rounded-2xl flex items-center justify-center">
-            <QrCode size={24} />
-          </div>
-          <div className="flex-1 text-left">
-            <div className="font-semibold">{t.scanQR}</div>
-            <div className="text-xs opacity-90">{t.scanQRDesc}</div>
-          </div>
-          <ChevronRight size={22} />
-        </button>
+        <div style={{ color: SUB }} className="text-xs uppercase tracking-wider font-semibold mb-2 mt-4">{lang === "ru" ? "Безопасность" : "Safety"}</div>
+        <SettingsRow icon={<Moon size={18} />}       label={t.curfew}        value={`${t.curfewFrom} – ${t.curfewTo}`} onClick={() => go("zone-setup")} />
+        <SettingsRow icon={<Brain size={18} />}       label={t.aiCallToggle}  toggle toggled={aiToggle}  onClick={() => setAiToggle((v) => !v)} />
+        <SettingsRow icon={<Activity size={18} />}   label={t.fallDetection} toggle toggled={fallToggle} onClick={() => setFallToggle((v) => !v)} />
+        <SettingsRow icon={<Phone size={18} />}      label={t.emergencyContact} value="+7 921 000-0000" onClick={() => {}} />
 
-        <SettingsRow
-          icon={<Globe size={18} />} label={t.language}
-          value={lang === "ru" ? "\u0420\u0443\u0441\u0441\u043a\u0438\u0439" : "English"}
-          onClick={() => setLang(lang === "ru" ? "en" : "ru")}
-        />
-        <SettingsRow icon={<Bell size={18} />} label={t.notifications} value="On" />
-        <SettingsRow icon={<HelpCircle size={18} />} label={t.help} />
-        <SettingsRow icon={<LogOut size={18} />} label={t.logout} danger onClick={resetDemo} />
+        <div style={{ color: SUB }} className="text-xs uppercase tracking-wider font-semibold mb-2 mt-4">{lang === "ru" ? "Приложение" : "App"}</div>
+        <SettingsRow icon={<Globe size={18} />} label={t.language} value={lang === "ru" ? "Русский" : "English"} onClick={() => {}} />
+        <SettingsRow icon={<Type size={18} />}  label={t.fontSize}  value={fontSize === "small" ? t.small : fontSize === "medium" ? t.medium : t.large} onClick={() => {}} />
+        <SettingsRow icon={<LogOut size={18} />} label={t.logout} danger onClick={() => go("register")} />
       </div>
-    </>
+      <BottomTab active="settings" onTab={go} t={t} />
+    </div>
   );
 
-  const PairScan = () => (
-    <>
-      <TopBar title={t.scanQR} onBack={() => setScreen("settingsCare")} />
-      <div className="px-5">
-        <div
-          style={{
-            background: "linear-gradient(135deg,#0f172a 0%,#1f2937 100%)",
-            borderRadius: 28, height: 420, position: "relative",
-          }}
-          className="overflow-hidden mb-4 flex items-center justify-center"
-        >
-          <div style={{ transform: "scale(.9)", filter: "drop-shadow(0 10px 25px rgba(0,0,0,.4))" }}>
-            <FakeQR size={200} />
+  const RiskScore = () => (
+    <div style={{ background: BG }}>
+      <TopBar title={t.riskScore} onBack={() => go("home-cg")} />
+
+      <div className="px-5 space-y-3 pb-8">
+        {/* Gauge */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border flex flex-col items-center">
+          <RiskGauge score={45} size={200} />
+          <div style={{ background: "#fef9c3", color: YELLOW }} className="text-sm font-bold px-4 py-1.5 rounded-full flex items-center gap-1.5 mt-1">
+            <AlertTriangle size={13} /> {t.medRisk}
           </div>
-          <div style={{ position: "absolute", width: 240, height: 240, border: `3px solid ${BRAND}`, borderRadius: 24 }} />
-          <div
-            style={{
-              position: "absolute", top: "50%", left: "calc(50% - 120px)",
-              right: "calc(50% - 120px)", height: 2, background: BRAND,
-              boxShadow: `0 0 12px ${BRAND}`,
-            }}
-          />
-          <div
-            style={{ position: "absolute", bottom: 20, left: 20, right: 20, background: "rgba(0,0,0,.5)", color: "#fff" }}
-            className="rounded-2xl px-4 py-2 text-center text-sm"
-          >
-            {t.align}
+          <div style={{ color: SUB }} className="text-xs mt-2 text-center">{t.riskExplain}</div>
+        </div>
+
+        {/* Breakdown */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: TEXT }} className="font-bold text-sm mb-3">{lang === "ru" ? "Состав (текущий)" : "Breakdown (current)"}</div>
+          {[
+            { label: t.noUsualRoute,  pts: 30, max: 30, color: BRAND },
+            { label: t.walkingCircles,pts: 0,  max: 25, color: RED },
+            { label: t.longAbsence,   pts: 15, max: 40, color: YELLOW },
+            { label: t.nightWalk,     pts: 0,  max: 20, color: PURPLE },
+            { label: t.suddenStop,    pts: 0,  max: 15, color: BLUE },
+          ].map((r, i) => (
+            <div key={i} className="mb-3">
+              <div className="flex justify-between mb-1">
+                <span style={{ color: TEXT }} className="text-sm">{r.label}</span>
+                <span style={{ color: r.pts > 0 ? r.color : SUB }} className="text-xs font-bold">{r.pts > 0 ? `+${r.pts}` : "0"}</span>
+              </div>
+              <div style={{ background: LINE }} className="h-1.5 rounded-full">
+                <div style={{ background: r.pts > 0 ? r.color : LINE, width: `${(r.pts / r.max) * 100}%` }} className="h-1.5 rounded-full" />
+              </div>
+            </div>
+          ))}
+          <div style={{ borderTop: `1px solid ${LINE}` }} className="flex items-center justify-between pt-2 mt-1">
+            <div style={{ color: TEXT }} className="font-bold">{lang === "ru" ? "Итого" : "Total"}</div>
+            <div style={{ color: YELLOW }} className="font-bold text-xl">45 / 100</div>
           </div>
         </div>
 
-        <PrimaryButton
-          onClick={() => { setPaired(true); showToast(t.successPaired); setScreen("caregiver"); }}
-          icon={<Check size={20} />}
-        >
-          {t.connect}
-        </PrimaryButton>
-        <div className="h-6" />
+        {/* History bars */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: TEXT }} className="font-bold text-sm mb-3">{lang === "ru" ? "История (7 дней)" : "History (7 days)"}</div>
+          <div className="flex items-end gap-2 h-16">
+            {[30, 15, 45, 82, 60, 45, 45].map((v, i) => {
+              const color = v >= 70 ? RED : v >= 40 ? YELLOW : GREEN;
+              return (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div style={{ background: color, height: `${(v / 100) * 56}px`, minHeight: 4 }} className="w-full rounded-t-md" />
+                  <span style={{ color: SUB }} className="text-xs">{["M", "T", "W", "T", "F", "S", "S"][i]}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
-    </>
+    </div>
   );
 
-  const Rewards = () => {
-    const coupons = [
-      { id: "c7", title: t.discount10, desc: t.discount10Desc, days: 7, code: "MED7-10OFF", color: "#ff7d29", unlocked: coupon7Unlocked },
-      { id: "c14", title: t.discount25, desc: t.discount25Desc, days: 14, code: "MED14-25OFF", color: "#8b5cf6", unlocked: coupon14Unlocked },
-    ];
-    return (
-      <>
-        <TopBar title={t.myRewards} onBack={() => setScreen("elder")} />
-        <div className="px-5 pb-8">
-          <div style={{ background: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #fef3c7 100%)" }} className="rounded-3xl p-5 border mb-4 flex items-center gap-4">
-            <div style={{ background: "rgba(255,255,255,.7)", borderRadius: 20 }} className="p-1">
-              <Plant adherence={adherence} size={110} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <div style={{ background: "#ff7d29", color: "#fff" }} className="px-2.5 py-1 rounded-full text-sm font-bold flex items-center gap-1">
-                  <span style={{ fontSize: 16 }}>{"\ud83d\udd25"}</span>
-                  {effectiveStreak}
-                </div>
-                <div style={{ color: "#14532d" }} className="text-xs font-bold">
-                  {t.streakDays}
-                </div>
-              </div>
-              <div style={{ color: "#14532d" }} className="font-bold text-base">
-                {t.greatJob}
-              </div>
-              <div style={{ color: "#166534" }} className="text-xs mt-1">
-                {daysToNextCoupon > 0
-                  ? daysToNextCoupon + " " + t.toCoupon
-                  : t.couponAvailable}
-              </div>
-            </div>
-          </div>
+  const LowPower = () => (
+    <div style={{ background: BG }}>
+      <TopBar title={t.lowPower} onBack={() => go("home-cg")} />
 
-          <div style={{ color: SUB }} className="text-xs font-semibold uppercase tracking-wider mb-2 ml-1">
-            {t.coupons}
-          </div>
-
-          <div className="space-y-3">
-            {coupons.map((c) => (
-              <div
-                key={c.id}
-                style={{
-                  background: c.unlocked ? "#fff" : "#f3f4f6",
-                  opacity: c.unlocked ? 1 : 0.7,
-                  borderLeft: `4px solid ${c.unlocked ? c.color : "#d1d5db"}`,
-                }}
-                className="rounded-2xl p-4 border flex items-center gap-3"
-              >
-                <div
-                  style={{
-                    background: c.unlocked ? c.color + "22" : "#e5e7eb",
-                    color: c.unlocked ? c.color : "#9ca3af",
-                  }}
-                  className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 text-2xl font-black"
-                >
-                  {c.days === 7 ? "10%" : "25%"}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div style={{ color: c.unlocked ? TEXT : SUB }} className="font-bold text-base truncate">
-                    {c.title}
-                  </div>
-                  <div style={{ color: SUB }} className="text-xs truncate">{c.desc}</div>
-                  <div style={{ color: c.unlocked ? c.color : SUB }} className="text-xs font-semibold mt-1">
-                    {c.unlocked ? (
-                      <span>{"\u2713 "}{t.unlocked}</span>
-                    ) : (
-                      <span>{t.unlockAt} {c.days} {t.streakDays}</span>
-                    )}
-                  </div>
-                </div>
-                {c.unlocked && (
-                  <button
-                    onClick={() => {
-                      setRedeemedCoupons((prev) => prev.includes(c.id) ? prev : [...prev, c.id]);
-                      showToast(t.showCode + ": " + c.code);
-                    }}
-                    style={{ background: c.color, color: "#fff" }}
-                    className="px-3 py-2 rounded-xl text-xs font-bold shadow"
-                  >
-                    {t.redeem}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {!coupon7Unlocked && !coupon14Unlocked && (
-            <div style={{ background: CARD, color: SUB }} className="rounded-2xl p-4 text-center border text-sm mt-3">
-              {t.noRewards}
-            </div>
-          )}
-
-          <div style={{ color: SUB }} className="text-xs mt-4 leading-relaxed px-1">
-            {t.validIn}
+      <div className="px-5 space-y-3 pb-8">
+        {/* Battery alert */}
+        <div style={{ background: "#fef3c7", borderLeft: `4px solid ${YELLOW}` }} className="rounded-2xl px-4 py-3 flex items-center gap-3">
+          <Battery size={28} color={YELLOW} />
+          <div>
+            <div style={{ color: TEXT }} className="font-bold">15%</div>
+            <div style={{ color: SUB }} className="text-xs">{t.lowPowerDesc}</div>
           </div>
         </div>
-      </>
-    );
-  };
 
-    const current = {
-    register:      Register(),
-    role:          Role(),
-    elderType:     ElderType(),
-    elder:         ElderHome(),
-    addMed:        AddMed(),
-    scan:          ScanRx(),
-    settingsElder: SettingsElder(),
-    caregiver:     CaregiverHome(),
-    settingsCare:  SettingsCare(),
-    pairScan:      PairScan(),
-    rewards:       Rewards(),
+        {/* Positioning stack */}
+        <div style={{ background: CARD }} className="rounded-3xl p-4 border">
+          <div style={{ color: TEXT }} className="font-bold text-sm mb-3">{lang === "ru" ? "Режим позиционирования" : "Positioning mode"}</div>
+          {[
+            { icon: <Wifi size={18} />,     label: t.wifiPos,   active: true,  color: GREEN,  sub: lang === "ru" ? "Обнаружены 3 сети" : "3 networks found" },
+            { icon: <Signal size={18} />,   label: t.cellTowers,active: false, color: SUB,    sub: lang === "ru" ? "Резерв" : "Fallback" },
+            { icon: <Radio size={18} />,    label: t.bleBeacons,active: false, color: SUB,    sub: lang === "ru" ? "Внутри здания" : "Indoors" },
+            { icon: <Navigation size={18} />,label: t.ins,      active: false, color: SUB,    sub: lang === "ru" ? "Без сигнала" : "No signal" },
+          ].map((p, i) => (
+            <div key={i} style={{ background: p.active ? "#d1fae5" : BG, opacity: p.active ? 1 : 0.6 }} className="rounded-2xl px-4 py-3 flex items-center gap-3 mb-2">
+              <div style={{ color: p.active ? GREEN : SUB }}>{p.icon}</div>
+              <div className="flex-1">
+                <div style={{ color: TEXT }} className="text-sm font-semibold">{p.label}</div>
+                <div style={{ color: SUB }} className="text-xs">{p.sub}</div>
+              </div>
+              {p.active && <div style={{ background: GREEN }} className="w-2 h-2 rounded-full" />}
+            </div>
+          ))}
+        </div>
+
+        {/* GPS disabled notice */}
+        <div style={{ background: RED + "10", color: RED, borderLeft: `4px solid ${RED}` }} className="rounded-2xl px-4 py-3">
+          <div className="font-semibold text-sm">{lang === "ru" ? "GPS отключён" : "GPS disabled"}</div>
+          <div className="text-xs opacity-80">{lang === "ru" ? "Включится при зарядке &gt;20%" : "Will re-enable when charged >20%"}</div>
+        </div>
+
+        {/* Tip */}
+        <div style={{ background: BRAND_SOFT }} className="rounded-3xl p-4 border border-orange-100">
+          <div className="flex items-start gap-3">
+            <Zap size={20} color={BRAND} className="shrink-0 mt-0.5" />
+            <div>
+              <div style={{ color: BRAND }} className="font-bold text-sm mb-1">{t.tipTitle}</div>
+              <div style={{ color: TEXT }} className="text-sm leading-relaxed">{t.tipDesc}</div>
+            </div>
+          </div>
+        </div>
+
+        <PrimaryButton onClick={() => go("home-cg")}>{lang === "ru" ? "Понятно" : "Got it"}</PrimaryButton>
+      </div>
+    </div>
+  );
+
+  /* ============================= ROUTING ============================= */
+
+  const current = {
+    register:    <Register />,
+    role:        <Role />,
+    "home-cg":   <CaregiverHome />,
+    map:         <MapView />,
+    "zone-setup":<ZoneSetup />,
+    alerts:      <AlertsList />,
+    "new-zone":  <NewZoneAlert />,
+    unusual:     <UnusualBehavior />,
+    "ai-call":   <AiCall />,
+    "behavior-ml":<BehaviorML />,
+    "fall-detect":<FallDetect />,
+    "home-elder":<ElderHome />,
+    settings:    <SettingsCare />,
+    "risk-score":<RiskScore />,
+    "low-power": <LowPower />,
   }[screen];
 
   return (
@@ -1905,99 +1538,68 @@ export default function App() {
         minHeight: "100vh",
         fontSize: fontPx,
         color: TEXT,
-        fontFamily:
-          'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
+        fontFamily: 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif',
       }}
       className="flex"
     >
-      <aside
-        style={{ background: "#fff", borderRight: `1px solid ${LINE}` }}
-        className="w-72 shrink-0 p-5 h-screen overflow-y-auto"
-      >
+      {/* Sidebar */}
+      <aside style={{ background: "#fff", borderRight: `1px solid ${LINE}` }} className="w-72 shrink-0 p-5 h-screen overflow-y-auto">
         <div className="flex items-center gap-2 mb-1">
           <div style={{ background: BRAND }} className="w-9 h-9 rounded-xl flex items-center justify-center">
-            <Pill color="#fff" size={18} />
+            <Shield color="#fff" size={18} />
           </div>
           <div>
-            <div className="font-bold text-lg">MedRemind</div>
+            <div className="font-bold text-lg">SafeStep</div>
             <div style={{ color: SUB }} className="text-xs">{t.designReview}</div>
           </div>
         </div>
 
-        <div style={{ color: SUB }} className="text-xs uppercase tracking-wider font-semibold mt-6 mb-2">
-          {t.allScreens}
-        </div>
+        <div style={{ color: SUB }} className="text-xs uppercase tracking-wider font-semibold mt-6 mb-2">{t.allScreens}</div>
         <div className="space-y-1">
-          {screens.map((s) => (
-            <button
-              key={s.id}
-              onClick={() => setScreen(s.id)}
-              style={{
-                background: screen === s.id ? BRAND : "transparent",
-                color: screen === s.id ? "#fff" : TEXT,
-              }}
-              className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium"
-            >
+          {screenList.map((s) => (
+            <button key={s.id} onClick={() => setScreen(s.id)}
+              style={{ background: screen === s.id ? BRAND : "transparent", color: screen === s.id ? "#fff" : TEXT }}
+              className="w-full text-left px-3 py-2 rounded-xl text-sm font-medium">
               {s.label}
             </button>
           ))}
         </div>
 
-        <div style={{ color: SUB }} className="text-xs uppercase tracking-wider font-semibold mt-6 mb-2">
-          {t.language}
-        </div>
+        <div style={{ color: SUB }} className="text-xs uppercase tracking-wider font-semibold mt-6 mb-2">{t.language}</div>
         <div className="grid grid-cols-2 gap-2">
           {["ru", "en"].map((l) => (
-            <button
-              key={l}
-              onClick={() => setLang(l)}
-              style={{
-                background: lang === l ? BRAND : CARD,
-                color: lang === l ? "#fff" : TEXT,
-                borderColor: lang === l ? BRAND : LINE,
-              }}
-              className="rounded-xl py-2 border font-semibold text-sm"
-            >
-              {l === "ru" ? "\u0420\u0443\u0441\u0441\u043a\u0438\u0439" : "English"}
+            <button key={l} onClick={() => setLang(l)}
+              style={{ background: lang === l ? BRAND : CARD, color: lang === l ? "#fff" : TEXT, borderColor: lang === l ? BRAND : LINE }}
+              className="rounded-xl py-2 border font-semibold text-sm">
+              {l === "ru" ? "Русский" : "English"}
             </button>
           ))}
         </div>
 
-        <div style={{ color: SUB }} className="text-xs uppercase tracking-wider font-semibold mt-6 mb-2">
-          {t.fontSize}
-        </div>
+        <div style={{ color: SUB }} className="text-xs uppercase tracking-wider font-semibold mt-6 mb-2">{t.fontSize}</div>
         <div className="grid grid-cols-3 gap-2">
           {["small", "medium", "large"].map((s) => (
-            <button
-              key={s}
-              onClick={() => setFontSize(s)}
-              style={{
-                background: fontSize === s ? BRAND : CARD,
-                color: fontSize === s ? "#fff" : TEXT,
-                borderColor: fontSize === s ? BRAND : LINE,
-              }}
-              className="rounded-xl py-2 border font-semibold text-sm"
-            >
+            <button key={s} onClick={() => setFontSize(s)}
+              style={{ background: fontSize === s ? BRAND : CARD, color: fontSize === s ? "#fff" : TEXT, borderColor: fontSize === s ? BRAND : LINE }}
+              className="rounded-xl py-2 border font-semibold text-sm">
               {s === "small" ? t.small : s === "medium" ? t.medium : t.large}
             </button>
           ))}
         </div>
 
-        <button
-          onClick={resetDemo}
-          style={{ background: CARD, color: TEXT, borderColor: LINE }}
-          className="w-full mt-6 rounded-xl py-2 border font-semibold text-sm flex items-center justify-center gap-2"
-        >
+        <button onClick={resetDemo} style={{ background: CARD, color: TEXT, borderColor: LINE }}
+          className="w-full mt-6 rounded-xl py-2 border font-semibold text-sm flex items-center justify-center gap-2">
           <RotateCcw size={14} /> {t.reset}
         </button>
 
         <div style={{ color: SUB }} className="text-xs mt-6 leading-relaxed">
           {lang === "ru"
-            ? "\u041f\u043e\u043b\u043d\u043e\u0441\u0442\u044c\u044e \u0438\u043d\u0442\u0435\u0440\u0430\u043a\u0442\u0438\u0432\u043d\u043e: \u0437\u0430\u043f\u043e\u043b\u043d\u0438\u0442\u0435 \u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0430\u0446\u0438\u044e, \u0437\u0430\u0433\u0440\u0443\u0437\u0438\u0442\u0435 \u0430\u0432\u0430\u0442\u0430\u0440, \u0434\u043e\u0431\u0430\u0432\u043b\u044f\u0439\u0442\u0435 \u043b\u0435\u043a\u0430\u0440\u0441\u0442\u0432\u0430, \u043e\u0442\u043c\u0435\u0447\u0430\u0439\u0442\u0435 \u043f\u0440\u0438\u0451\u043c\u044b \u0442\u0430\u043f\u043e\u043c \u043f\u043e \u043a\u0430\u0440\u0442\u043e\u0447\u043a\u0435."
-            : "Fully interactive: fill in registration, upload an avatar, add medications, tap a pill card to log a dose."}
+            ? "Полностью интерактивно: зарегистрируйтесь, выберите роль и исследуйте все функции."
+            : "Fully interactive: register, choose a role, and explore all features."}
         </div>
       </aside>
 
+      {/* Phone preview */}
       <main className="flex-1 flex items-center justify-center p-8 relative">
         <PhoneFrame>{current}</PhoneFrame>
         <Toast text={toast} show={!!toast} />
